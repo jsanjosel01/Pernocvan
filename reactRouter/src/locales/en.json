@@ -1,0 +1,14 @@
+{
+  "welcome": "Welcome {{user}}",
+
+  "footer": "&copy; 2026 Mi Aplicación React.",
+  
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}
+
+
+    
+
