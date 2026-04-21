@@ -56,7 +56,7 @@ export default function LoginForm() {
                     <Input 
                         className="h-12 text-lg pr-14"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Mínimo 6 caracteres" 
+                        placeholder="Mínimo 8 caracteres" 
                         value={formData.password} 
                         onChange={(e) => setFormData({...formData, password: e.target.value})}
                     />
@@ -85,7 +85,7 @@ export default function LoginForm() {
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
             ¿No tienes cuenta? {" "}
-            <Link to="/register" className="font-semibold text-primary hover:underline">
+            <Link to="/signup" className="font-semibold text-primary hover:underline">
                 Regístrate
             </Link>
         </p>

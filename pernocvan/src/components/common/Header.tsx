@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Button } from '../ui/button';
 
 export const Header = () => {
   return (
@@ -8,21 +9,21 @@ export const Header = () => {
         
         <div className="logo-section">
             <h1 className="text-2xl font-bold text-primary">
-              Prenocvan 
+              Pernocvan
             </h1>
         </div>
 
         <div className="auth-actions flex gap-3">
           <Link to="/login">
-            <button className="px-4 py-2 text-primary border border-primary rounded hover:bg-primary/10 transition">
+            <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
               Iniciar Sesión
-            </button>
+            </Button>
           </Link>
 
-          <Link to="/register">
-            <button className="px-4 py-2 text-primary-foreground bg-primary rounded hover:bg-primary/90 transition">
+          <Link to="/signup">
+            <Button>
               Registrarse
-            </button>
+            </Button>
           </Link>
         </div>
 
