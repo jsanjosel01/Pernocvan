@@ -20,11 +20,11 @@ export default function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
     <form 
         onSubmit={handleSubmit} 
-        className="w-full max-w-6xl rounded-2xl border border-border bg-card p-8 shadow-sm"
+        className="w-full max-w-lg rounded-2xl border border-border bg-card p-10 shadow-sm"
     >
         {/* Header */}
         <div className="mb-6 space-y-2 text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground">Acceder</h1>
+            <h1 className="text-4xl font-bold tracking-tight text-primary">Acceder</h1>
             <p className="text-lg text-muted-foreground">Introduce tus credenciales para acceder</p>
         </div>
 

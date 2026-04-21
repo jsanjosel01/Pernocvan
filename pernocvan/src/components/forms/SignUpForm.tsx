@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 
 import { type ChangeEvent, type FormEvent } from "react";
+import { supabase } from "../../database/supabase/client";
 
 export default function SignUpForm() {
     const navigate = useNavigate();
@@ -65,13 +66,13 @@ export default function SignUpForm() {
         }
         
         // 2. Validación de correos
-        if (formData.email !== formData.confirmEmail) {
+        if (formData.email.trim() !== formData.confirmEmail.trim()) {
             toast.error("Los correos electrónicos no coinciden");
             return;
         }
 
         // 3. Validación de contraseñas
-        if (formData.password !== formData.confirmPassword) {
+        if (formData.password.trim() !== formData.confirmPassword.trim()) {
             toast.error("Las contraseñas no coinciden");
             return;
         }
@@ -84,13 +85,44 @@ export default function SignUpForm() {
 
         // Si pasa todas las aduanas, entonces cargamos
         setIsLoading(true);
-        console.log("Datos a registrar:", formData);
+        console.log("Iniciando registro en Supabase para:", formData.email);
         
-        setTimeout(() => {
-            setIsLoading(false);
+        // --- CONEXIÓN REAL A SUPABASE ---
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                // Añadimos .trim() aquí para limpiar espacios invisibles
+                email: formData.email.trim(), 
+                password: formData.password.trim(),
+                options: {
+                    data: {
+                        // Limpiamos también el nombre de usuario por si acaso
+                        username: formData.username.trim(), 
+                    }
+                }
+            });
+
+            if (error) {
+                // Mensajes de error amigables
+                if (error.message.includes("already registered") || error.message.includes("already exists")) {
+                    toast.error("Este correo ya está registrado.");
+                } else {
+                    toast.error("Error al registrar: " + error.message);
+                }
+                return; 
+            }
+
+            // Éxito
             toast.success("¡Cuenta creada con éxito!");
+            console.log("Usuario creado en DB:", data.user);
+            
             navigate("/login");
-        }, 1500);
+
+        } catch (err) {
+            console.error("Error inesperado:", err);
+            toast.error("Ocurrió un error inesperado de conexión.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -181,12 +213,12 @@ export default function SignUpForm() {
                 {isLoading ? (
                     <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        Registrando...
+                        <span>Registrando...</span>
                     </>
                 ) : (
                     <>
                         {/* Si no es válido, mostramos el icono de prohibido */}
-                        Registrarse
+                        <span>Registrarse</span>
                     </>
                 )}
             </Button>
