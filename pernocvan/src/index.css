@@ -14,6 +14,14 @@
   --color-card-foreground: #09090b;
   --color-border: #e4e4e7;
   --color-input: #e4e4e7;
+
+  --color-footer-bg: #18181b;
+
+  /* AÑADE ESTO PARA QUE FUNCIONE EL FOOTER */
+  --color-neutral-950: #0a0a0a;
+  --color-neutral-800: #27272a;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-300: #d4d4d8;
 }
 
 @layer base {
@@ -23,7 +31,7 @@
 }
 
 
-/* Ocultar icono en navegadores modernos (Edge/Chrome) */
+/* Ocultar icono del ojo por defecto en navegadores (Edge/Chrome) */
 input::-ms-reveal, 
 input::-ms-clear { 
     display: none !important; 
