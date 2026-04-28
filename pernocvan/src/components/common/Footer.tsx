@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 
 export const Footer = () => {
     return (
-        <footer className="bg-footer-bg text-neutral-300 mt-20 border-t border-neutral-800">
+        <footer className="bg-footer-bg text-neutral-300 border-t border-neutral-800">
             <div className="mx-auto max-w-6xl px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-12">
                 
                 {/* Columna 1: Logo y descripción */}
@@ -18,13 +18,13 @@ export const Footer = () => {
 
                 {/* Columna 2: Navegación */}
                 <div className="space-y-4">
-    <h3 className="font-semibold text-white">Cuenta</h3>
-    <ul className="space-y-2 text-sm">
-        <li><Link to="/signup" className="hover:text-primary transition-colors">Únete</Link></li>
-        <li><Link to="/login" className="hover:text-primary transition-colors">Inicia sesión</Link></li>
-        <li><Link to="/mapa" className="hover:text-primary transition-colors">Explorar Mapa</Link></li>
-    </ul>
-</div>
+                  <h3 className="font-semibold text-white">Cuenta</h3>
+                  <ul className="space-y-2 text-sm">
+                      <li><Link to="/signup" className="hover:text-primary transition-colors">Únete</Link></li>
+                      <li><Link to="/login" className="hover:text-primary transition-colors">Inicia sesión</Link></li>
+                      <li><Link to="/mapa" className="hover:text-primary transition-colors">Explorar Mapa</Link></li>
+                  </ul>
+              </div>
 
                 {/* Columna 3: Legal */}
                 <div className="space-y-4">

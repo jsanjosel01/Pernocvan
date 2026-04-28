@@ -95,10 +95,10 @@ export default function Profile() {
     if (loading) return <div className="p-8 text-center min-h-screen flex items-center justify-center">Cargando perfil...</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 py-10 px-4">
+        <div className="min-h-screen bg-gray-50 pt-20 pb-32 px-4">
             <div className="max-w-2xl mx-auto">
-                <form onSubmit={handleUpdate} className="bg-white p-8 rounded-2xl shadow-sm space-y-8" style={{ border: 'none' }}>
-                    
+                <form onSubmit={handleUpdate} className="w-full rounded-2xl border border-gray-200 bg-white p-10 shadow-lg space-y-8">
+
                     {/* CABECERA */}
                     <div className="flex items-center justify-between pb-6 border-b">
                         <div className="space-y-2">

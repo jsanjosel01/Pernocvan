@@ -9,7 +9,7 @@ interface AvatarUploaderProps {
     onUpload: (url: string) => void;
 }
 
-// ESTO ES LO IMPORTANTE: export const AvatarUploader
+
 export const AvatarUploader: React.FC<AvatarUploaderProps> = ({ uid, url, onUpload }) => {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);

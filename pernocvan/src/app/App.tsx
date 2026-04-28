@@ -8,6 +8,8 @@ import { Toaster } from 'sonner';
 import { SignUpPage } from '../pages/SignUpPage';
 import Profile from '../pages/Profile';
 
+import { Footer } from '../components/common/Footer';
+
 function App() {
   return (
     <AppLayout>
@@ -22,8 +24,10 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/profile" element={<Profile />} />
 
-
+        
       </Routes>
+
+      
     </AppLayout>
   );
 }

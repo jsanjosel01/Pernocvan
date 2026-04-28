@@ -126,6 +126,7 @@ export default function SignUpForm() {
     };
 
     return (
+        
         <form onSubmit={handleSubmit} className={`w-full space-y-5 animate-in fade-in duration-500 `}>
             
             {/* FORMULARIO */}
