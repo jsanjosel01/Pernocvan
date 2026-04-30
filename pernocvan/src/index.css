@@ -5,29 +5,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  /* Color principal verde */
-  --color-primary: #16a34a;
-  --color-primary-foreground: #ffffff;
-
-  /* Fondo unificado: slate-50 (#f8fafc) */
-  --color-background: #f8fafc;
-  --color-card: #f8fafc;
-
-  /* Resto de colores */
-  --color-foreground: #09090b;
-  --color-card-foreground: #09090b;
-  --color-border: #e4e4e7;
-  --color-input: #e4e4e7;
-
-  --color-footer-bg: #18181b;
-
-  /* FOOTER */
-  --color-neutral-950: #1d1c1c;
-  --color-neutral-800: #27272a;
-  --color-neutral-400: #a1a1aa;
-  --color-neutral-300: #d4d4d8;
-}
 
 @layer base {
   body {
@@ -97,6 +74,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+
+  /* FOOTER 
+  --color-neutral-950: #1d1c1c;
+  --color-neutral-800: #27272a;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-300: #d4d4d8;*/
+  
 }
 
 :root {

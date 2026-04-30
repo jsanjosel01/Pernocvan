@@ -3,7 +3,7 @@ import { supabase } from "../database/supabase/client";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
-import { AvatarUploader } from "../components/ui/AvatarUploader";
+import { AvatarUploader } from "../components/old/AvatarUploader";
 
 export default function Profile() {
     const [profile, setProfile] = useState({
