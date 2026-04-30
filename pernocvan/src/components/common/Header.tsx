@@ -1,10 +1,11 @@
-import React from 'react';
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { supabase } from '../../database/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 
+import { Map, Globe, Sun, Moon} from 'lucide-react';
 
 export const Header = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -30,7 +31,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-50 border-b border-border">
+    <header className="sticky top-0 z-50 bg-background border-b border-border">
       <div className="flex justify-between items-center p-4">
         
         <div className="logo-section">
@@ -41,35 +42,92 @@ export const Header = () => {
               alt="Pernocvan Logo" 
               className="h-16 w-16 object-contain" 
             />
-            <h1 className="text-2xl font-bold text-primary">Pernocvan</h1>
+            <h2 className="text-2xl font-bold text-primary">Pervan</h2>
           </Link>
         </div>
 
+        {/* SECCIÓN DERECHA: TODO JUNTO */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        
+        {/* BLOQUE DE HERRAMIENTAS (Mapa + Idioma + Tema) */}
+        <div className="flex items-center">
+
+          {/* Botón Mapa*/}
+          <Button 
+            variant="ghost" 
+            asChild 
+            className="cursor-pointer gap-2 text-muted-foreground hover:text-foreground transition-colors h-9 px-3"
+          >
+            <Link to="/mapa">
+              <Map className="h-4 w-4" />
+              <span className="text-sm font-medium hidden sm:inline">Mapa</span>
+            </Link>
+          </Button>
+
+          {/* Botón Idiomas*/}
+          <Button 
+            variant="ghost" 
+            className="cursor-pointer gap-2 text-muted-foreground hover:text-foreground transition-colors h-9 px-3"
+            title="Cambiar idioma"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="text-sm font-medium hidden sm:inline">ES</span>
+          </Button>
+
+          {/* Botón DARK/LIGHT*/}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="cursor-pointer text-muted-foreground hover:text-foreground h-9 w-9"
+            title="Cambiar tema"
+          >
+            <Sun className="h-4 w-4 dark:hidden" />
+            <Moon className="h-4 w-4 hidden dark:block" />
+          </Button>
+        </div>
+
+        {/* Separador "LINEA" */}
+        <div className="hidden sm:block h-5 w-[1px] bg-border mx-1" />
+
+
+        {/* Acciones botones */}
         <div className="auth-actions flex gap-3">
           {session ? (
-            // SI HAY SESIÓN: Mostrar Perfil y Cerrar Sesión
             <>
-              <Link to="/profile">
-                <Button variant="ghost">Mi Perfil</Button>
-              </Link>
-              <Button variant="destructive" onClick={handleLogout}>
-                Salir
+              {/* Botón de Perfil */}
+              <Button variant="outline" className="cursor-pointer border-border text-foreground h-9 px-4 transition-all duration-300 ease-in-out hover:bg-accent hover:border-foreground/30 hover:shadow-sm">
+                <Link to="/profile">Mi Perfil</Link>
+              </Button>
+
+              {/* El botón cerrar sesión */}
+              <Button variant="destructive" onClick={handleLogout} 
+                className="cursor-pointer h-9 px-4 transition-all duration-300 hover:opacity-90 hover:shadow-md active:scale-95"
+              >
+                Cerrar Sesión
               </Button>
             </>
           ) : (
-            // SI NO HAY SESIÓN: Mostrar Login y Registro
             <>
-              <Link to="/login">
-                <Button variant="outline" className="border-primary text-primary">
-                  Iniciar Sesión
-                </Button>
-              </Link>
-              <Link to="/signup">
-                <Button>Registrarse</Button>
-              </Link>
+              {/* Botón de Iniciar Sesión */}
+              <Button 
+                variant="outline" 
+                asChild 
+                className="cursor-pointer border-border text-foreground h-9 px-4 transition-all duration-300 ease-in-out hover:bg-accent hover:border-foreground/30 hover:shadow-sm"
+              >
+                <Link to="/login">Iniciar Sesión</Link>
+              </Button>
+
+              {/* Botón de Registro */}
+              <Button 
+                asChild 
+                className="cursor-pointer bg-primary text-primary-foreground h-9 px-5 font-medium shadow-sm transition-all duration-300 hover:opacity-90 hover:shadow-md"
+              >
+                <Link to="/signup">Registrarse</Link>
+              </Button>
             </>
           )}
         </div>
+      </div>
       </div>
     </header>
   );

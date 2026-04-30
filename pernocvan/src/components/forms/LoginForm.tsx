@@ -47,7 +47,8 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-20 pb-32 px-4">
+        <div className="min-h-screen bg-background pt-20 pb-32 px-4">
+            
             <form 
                 onSubmit={handleSubmit} 
                 className="w-full max-w-lg rounded-2xl border border-border bg-card p-10 shadow-sm"
