@@ -66,12 +66,14 @@ export default function LoginForm() {
     };
 
     const handleForgotPassword = async () => {
-    // 1. Limpiamos estados anteriores
     setErrorMsg(null);
     setIsSuccess(false);
 
-    // 2. Validación: que el email no esté vacío
-    if (!formData.email.trim()) {
+    
+    const emailFinal = formData.email.trim().toLowerCase();
+
+    // Validamos que tras la limpieza no esté vacío
+    if (!emailFinal) {
         setErrorMsg("Por favor, introduce tu correo electrónico.");
         return;
     }
@@ -79,18 +81,17 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-        // 3. Llamada a Supabase para resetear contraseña
-        const { error } = await supabase.auth.resetPasswordForEmail(formData.email.trim(), {
+        // IMPORTANTE: Enviamos 'emailFinal', NO 'formData.email'
+        const { error } = await supabase.auth.resetPasswordForEmail(emailFinal, {
             redirectTo: `${window.location.origin}/reset-password`,
         });
 
         if (error) {
-            // Si Supabase devuelve error (ej: email no válido)
+            console.error("Detalle del error:", error);
             setErrorMsg("No se ha podido verificar el estado de tu cuenta.");
             return;
         }
 
-        // 4. Éxito: Mostramos la alerta verde
         setIsSuccess(true);
         
     } catch (err) {
@@ -101,7 +102,7 @@ export default function LoginForm() {
 };
 
     return (
-        <div className="min-h-screen bg-background pt-20 pb-32 px-4">
+        <div className="flex justify-center bg-background pt-10 pb-40 px-4">
             
             <form 
                 onSubmit={handleSubmit} 
@@ -133,26 +134,29 @@ export default function LoginForm() {
                 {/* Contraseña */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-foreground">
-                        Contraseña <span className="text-red-500">*</span>
-                    </label>
+                        <label className="text-sm font-medium text-foreground">
+                            Contraseña <span className="text-red-500">*</span>
+                        </label>
                     </div>
 
                     <div className="relative">
-                    <Input 
-                        className="h-12 text-lg pr-14"
-                        type={showPassword ? "text" : "password"}
-                        value={formData.password} 
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer"
-                    >
-                        {showPassword ? <Eye size={22} /> : <EyeOff size={22} />}
-                    </button>
+                        <Input 
+                            className="h-12 text-lg pr-16"
+                            type={showPassword ? "text" : "password"}
+                            value={formData.password} 
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            placeholder="••••••••"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            /* Cambiado de right-4 a right-10 para no chocar con Passbolt */
+                            className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer transition-colors"
+                        >
+                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
                     </div>
+
                     
                     {/* Olvidaste tu contraseña */}
                     <div className="text-right">

@@ -126,7 +126,7 @@ export default function SignUpForm() {
     };
 
     return (
-        
+        <div className="flex justify-center bg-background pt-10 pb-40 px-4">
         <form onSubmit={handleSubmit} className={`w-full space-y-5 animate-in fade-in duration-500 `}>
             
             {/* FORMULARIO */}
@@ -231,5 +231,6 @@ export default function SignUpForm() {
                 </Button>
 
         </form>
+        </div>
     );
 }

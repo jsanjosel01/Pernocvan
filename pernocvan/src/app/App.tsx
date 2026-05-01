@@ -6,6 +6,7 @@ import LoginPage from '../pages/LoginPage';
 import { Toaster } from 'sonner';
 import { SignUpPage } from '../pages/SignUpPage';
 import Profile from '../pages/Profile';
+import ResetPassword from '@/pages/ResetPassword';
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </AppLayout>
   );
