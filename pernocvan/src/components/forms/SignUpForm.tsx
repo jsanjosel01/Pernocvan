@@ -127,31 +127,39 @@ export default function SignUpForm() {
 
     return (
         <div className="flex justify-center bg-background pt-10 pb-40 px-4">
-        <form onSubmit={handleSubmit} className={`w-full space-y-5 animate-in fade-in duration-500 `}>
-            
+        <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-2xl border border-border bg-card p-10 shadow-sm">
+            {/* Header */}
+            <div className="mb-6 space-y-2 text-center">
+                <h2 className="text-4xl font-bold tracking-tight text-primary">Crea una cuenta</h2>
+                <p className="text-lg text-muted-foreground">Únete para empezar a viajar</p>
+            </div>
+
+            <div className="space-y-5">
             {/* FORMULARIO */}
             <div className="space-y-2">
-                <label className="text-sm font-medium">Usuario <span className="text-red-500">*</span></label>
-                <Input name="username" placeholder="Nombre de usuario" value={formData.username} onChange={handleChange}/>
+                <div className="flex items-center">
+                <label className="text-sm font-medium text-foreground">Usuario <span className="text-red-500">*</span></label>
+                </div>
+                <Input className="h-12 text-lg"  name="username" placeholder="Nombre de usuario" value={formData.username} onChange={handleChange}/>
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium">Correo electrónico <span className="text-red-500">*</span></label>
-                <Input type="email" name="email" placeholder="correo@ejemplo.com" value={formData.email} onChange={handleChange} />
+                <div className="flex items-center">
+                    <label className="text-sm font-medium text-foreground">Correo electrónico <span className="text-red-500">*</span></label>
+                </div>      
+                <Input className="h-12 text-lg" type="email" name="email" placeholder="correo@ejemplo.com" value={formData.email} onChange={handleChange} />
             </div>
 
-            <div className="space-y-2">
-                <label className="text-sm font-medium">Confirmar correo <span className="text-red-500">*</span></label>
-                <Input type="email" name="confirmEmail" placeholder="correo@ejemplo.com" value={formData.confirmEmail} onChange={handleChange} />
-            </div>
 
             {/* Contraseñas */}
             <div className="space-y-5"> 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Contraseña <span className="text-red-500">*</span></label>
+                    <div className="flex items-center">
+                    <label className="text-sm font-medium text-foreground">Contraseña <span className="text-red-500">*</span></label></div>
                     <div className="relative">
-                        <Input type={showPassword ? "text" : "password"} name="password" placeholder="Julia12+" value={formData.password} onChange={handleChange} />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-500 hover:text-slate-700">
+                        <Input className="h-12 text-lg"  type={showPassword ? "text" : "password"} name="password" placeholder="Ej: Contra1+" value={formData.password} onChange={handleChange} />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer transition-colors">
                             {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                         </button>
                     </div>
@@ -162,11 +170,13 @@ export default function SignUpForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Confirmar contraseña <span className="text-red-500">*</span></label>
+                    <div className="flex items-center">
+                    <label className="text-sm font-medium text-foreground">Confirmar contraseña <span className="text-red-500">*</span></label></div>
                     <div className="relative">
-                        <Input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Repite tu contraseña" value={formData.confirmPassword} onChange={handleChange} />
-                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-slate-500 hover:text-slate-700">
-                            {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                        <Input className="h-12 text-lg"  type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Repite tu contraseña" value={formData.confirmPassword} onChange={handleChange} />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer transition-colors">
+                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                         </button>
                         
                     </div>
@@ -186,27 +196,32 @@ export default function SignUpForm() {
                 ))}
             </div>
 
+            </div>
+
             {/* CHECKBOXES LEGALES */}
             <div className="space-y-3 pt-2">
                 <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="terms" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} />
+                    <div className="flex items-center">
+                        <input type="checkbox" id="terms" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} /> 
+                    </div>
                     <label htmlFor="terms" className="text-sm text-muted-foreground">
                         Acepto los <Link to="/terms" className="underline hover:text-primary font-medium text-foreground">Términos y Condiciones de uso</Link>.
                     </label>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="privacy" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} />
+                    <div className="flex items-center">
+                        <input type="checkbox" id="privacy" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" checked={acceptedPrivacy} onChange={(e) => setAcceptedPrivacy(e.target.checked)} />
+                    </div>
                     <label htmlFor="privacy" className="text-sm text-muted-foreground">
                         Acepto la <Link to="/privacy" className="underline hover:text-primary font-medium text-foreground">Política de privacidad y tratamiento de datos</Link>.
                     </label>
                 </div>
-                
             </div>
 
             
             <Button disabled={isLoading}
-                className={`w-full h-12 text-lg font-semibold transition-all flex items-center justify-center gap-2 
+                className={`w-full h-12 text-lg font-semibold transition-all flex items-center justify-center gap-2 mt-8
                         bg-primary hover:bg-primary/90 
                         ${isFormInvalid ? "cursor-not-allowed opacity-90" : "cursor-pointer"} 
                         disabled:cursor-wait`}
@@ -224,7 +239,7 @@ export default function SignUpForm() {
                 )}
             </Button>
 
-            <Button variant="outline" asChild className="w-full h-12 text-lg font-semibold border-primary text-primary hover:bg-primary/5 hover:text-primary transition-all duration-300">
+            <Button variant="outline" asChild className="w-full h-12 text-lg font-semibold border-primary text-primary hover:bg-primary/5 hover:text-primary transition-all duration-300 mt-2">
                     <Link to="/login">
                         Ya tengo cuenta
                     </Link>
@@ -232,5 +247,6 @@ export default function SignUpForm() {
 
         </form>
         </div>
+        
     );
 }
