@@ -4,7 +4,8 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 import { AvatarUploader } from "../components/avatar/AvatarUploader";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
     const [profile, setProfile] = useState({
@@ -17,6 +18,7 @@ export default function Profile() {
         van_model: "",
         bio: "",
     });
+
 
     const [formData, setFormData] = useState({ ...profile });
     const [email, setEmail] = useState("");
@@ -38,28 +40,31 @@ export default function Profile() {
             setMemberSince(date.toLocaleDateString('es-ES'));
         }
 
-        const { data } = await supabase
-            .from("perfiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
+        const { data, error } = await supabase
+        .from("perfiles") 
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
 
-        if (data) {
-            const loadedData = {
-                username: data.username || "",
-                full_name: data.full_name || "",
-                address: data.address || "",
-                avatar_url: data.avatar_url || "",
-                favorite_places: data.favorite_places || "",
-                rol: data.rol || "",
-                van_model: data.van_model || "",
-                bio: data.bio || ""
-            };
-            setProfile(loadedData);
-            setFormData(loadedData);
-        }
-        setLoading(false);
-    }
+        if (error) console.error("Error conexión:", error.message);
+        console.log("Datos recuperados:", data);
+
+                if (data) {
+                    const loadedData = {
+                        username: data.username || "",
+                        full_name: data.full_name || "",
+                        address: data.address || "",
+                        avatar_url: data.avatar_url || "",
+                        favorite_places: data.favorite_places || "",
+                        rol: data.rol || "",
+                        van_model: data.van_model || "",
+                        bio: data.bio || ""
+                    };
+                    setProfile(loadedData);
+                    setFormData(loadedData);
+                }
+                setLoading(false);
+            }
 
     useEffect(() => {
         fetchProfile();
@@ -182,6 +187,33 @@ export default function Profile() {
                                 />
                             </div>
                         </div>
+
+
+                    {/* SECCIÓN DE ADMINISTRACIÓN (Solo visible para administradores) */}
+                    {profile.rol === "administrador" && (
+                        <div className="mt-10 pt-6 border-t-2 border-dashed border-primary/20">
+                            <div className="bg-primary/5 rounded-xl p-6 border border-primary/10 flex items-center justify-between group">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2 text-primary font-bold">
+                                        <ShieldCheck className="h-5 w-5" />
+                                        <span>Panel de Control</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        Tienes acceso a la gestión de usuarios y roles.
+                                    </p>
+                                </div>
+                                <Link 
+                                    to="/admin" 
+                                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium transition-all hover:gap-3 active:scale-95"
+                                >
+                                    Ir ahora
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+
+                    
     
                         <Button 
                             type="submit" 

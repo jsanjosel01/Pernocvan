@@ -110,7 +110,7 @@ export default function LoginForm() {
             >
                 {/* Header */}
                 <div className="mb-6 space-y-2 text-center">
-                    <h1 className="text-4xl font-bold tracking-tight text-primary">Acceder</h1>
+                    <h2 className="text-4xl font-bold tracking-tight text-primary">Acceder</h2>
                     <p className="text-lg text-muted-foreground">Introduce tus credenciales para acceder</p>
                 </div>
 

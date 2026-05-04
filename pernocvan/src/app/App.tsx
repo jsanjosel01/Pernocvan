@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import { SignUpPage } from '../pages/SignUpPage';
 import Profile from '../pages/Profile';
 import ResetPassword from '@/pages/ResetPassword';
+import { AdminPage } from '@/pages/AdminPage';
 
 
 function App() {
@@ -20,6 +21,10 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+
+        
+        <Route path="/admin" element={<AdminPage />} />
+        
       </Routes>
     </AppLayout>
   );

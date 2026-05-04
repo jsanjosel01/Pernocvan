@@ -27,7 +27,8 @@ export const useAuthStore = create<AuthState>()(
         
         if (sessionUser.profile?.id) {
           const { data: role } = await userRepository.fetchRole(sessionUser.profile.id);
-          isAdmin = role === 'admin';
+          
+          isAdmin = role === 'administrador'; 
         }
 
         set({
@@ -38,10 +39,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       clearSession: async () => {
-  // 1. Cerramos sesión en el servidor de Supabase
+  // Cerramos sesión en el servidor de Supabase
   await supabase.auth.signOut();
 
-  // 2. Limpiamos el estado local (esto limpia el localStorage automáticamente)
+  // Limpiamos el estado local (esto limpia el localStorage automáticamente)
   set({
     sessionUser: null,
     isAuthenticated: false,

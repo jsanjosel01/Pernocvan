@@ -24,12 +24,18 @@ export const SupabaseUserRepository: UserRepository = {
     },
 
     fetchRole: async (userId: string) => {
-        const { data } = await supabase
-            .from('profiles')
-            .select('role')
+        const { data, error } = await supabase
+            .from('perfiles') // Nombre tabla
+            .select('rol')    // Nombre columna
             .eq('id', userId)
-            .single();
-        
-        return { data: data?.role || null };
+            .maybeSingle();
+
+        if (error) {
+            console.error("Error Supabase:", error.message);
+            return { data: 'usuario' }; 
+        }
+
+        // Retorna 'administrador' o 'usuario'
+        return { data: data?.rol || 'usuario' }; 
     }
 };
