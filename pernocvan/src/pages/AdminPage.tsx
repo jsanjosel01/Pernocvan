@@ -18,6 +18,8 @@ export const AdminPage = () => {
     setLoading(false);
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   useEffect(() => { cargarUsuarios(); }, []);
 
   // UPDATE EXTENDIDO: Guardar cambios desde el Inspector
@@ -93,7 +95,7 @@ export const AdminPage = () => {
               </span>
               <button 
                 onClick={() => setUsuarioSeleccionado(u)}
-                className="bg-foreground text-background px-4 py-2 rounded-xl font-bold text-sm hover:scale-105 transition-transform"
+                className="bg-foreground text-background px-4 py-2 rounded-xl font-bold text-sm hover:scale-105 cursor-pointer transition-transform"
               >
                 Gestionar
               </button>
@@ -110,7 +112,7 @@ export const AdminPage = () => {
     <div className="fixed top-0 right-0 h-screen w-full max-w-sm bg-card border-l border-border shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
             
         <div className="flex justify-end items-center p-5 pb-2">
-        <button onClick={() => setUsuarioSeleccionado(null)} className="p-1 hover:bg-muted rounded-full transition-colors">
+        <button onClick={() => setUsuarioSeleccionado(null)} className="p-1 hover:bg-muted rounded-full cursor-pointer transition-colors">
             <X className="h-5 w-5" />
         </button>
     </div>
@@ -192,22 +194,71 @@ export const AdminPage = () => {
           </div>
       </section>
 
-        {/* Footer de botones más compacto */}
+        {/* Footer de botones */}
         <footer className="pt-2 space-y-2">
           {!editando ? (
-            <button onClick={() => setEditando(true)} className="w-full py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90">Editar Perfil</button>
+            <button onClick={() => setEditando(true)} className="w-full py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 cursor-pointer">Editar Perfil</button>
           ) : (
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={guardarCambios} className="py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"><Save className="h-4 w-4"/> Guardar</button>
-              <button onClick={() => setEditando(false)} className="py-2.5 bg-secondary rounded-xl text-sm font-bold">Cancelar</button>
+              <button onClick={guardarCambios} className="py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95 cursor-pointer transition-all shadow-lg shadow-green-900/20"><Save className="h-4 w-4"/> Guardar</button>
+              <button onClick={() => setEditando(false)} className="py-2.5 bg-secondary/50 border border-border text-foreground rounded-xl text-sm font-bold active:scale-95 cursor-pointer hover:bg-secondary transition-all">Cancelar</button>
             </div>
           )}
-          <button 
+          {/* <button 
             onClick={() => eliminarUsuario(usuarioSeleccionado.id)} 
             className="w-full py-2 text-destructive/70 hover:text-destructive text-xs font-bold transition-colors flex items-center justify-center gap-2"
           >
             <Trash2 className="h-3 w-3" /> Borrar Usuario
+          </button> */}
+
+          {/* Botón que abre el modal */}
+          <button onClick={() => setShowDeleteConfirm(true)} className="w-full mt-4 py-2.5 border border-destructive/20 bg-destructive/5 text-destructive hover:bg-destructive/10 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+            <Trash2 className="h-3.5 w-3.5" /> Borrar Usuario
           </button>
+
+
+        {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
+        {showDeleteConfirm && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-in fade-in duration-300">
+                
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowDeleteConfirm(false)} />
+                
+                {/* Contenedor del Modal */}
+                <div className="relative bg-card border border-border w-full max-w-sm rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+                    <div className="text-center space-y-4">
+                        <div className="bg-destructive/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-destructive">
+                            <Trash2 className="h-8 w-8" />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-black tracking-tight">¿Quieres eliminar al viajero?</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Estás a punto de borrar a <span className="font-bold text-foreground">@{usuarioSeleccionado.username}</span>. 
+                                ¿Estás seguro? Eliminará todos sus datos.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-3 pt-4">
+                        {/* Botón de Confirmar */}
+                        <button onClick={() => {
+                                eliminarUsuario(usuarioSeleccionado.id);
+                                setShowDeleteConfirm(false);
+                            }}
+                            className="w-full py-3 bg-destructive text-white border border-white/10 rounded-2xl font-bold hover:bg-red-600 transition-all active:scale-95 cursor-pointer shadow-lg shadow-red-900/20"
+                        >
+                            Sí, eliminar definitivamente
+                        </button>
+
+                        {/* Botón de Cancelar */}
+                        <button onClick={() => setShowDeleteConfirm(false)} className="w-full py-3 bg-secondary/50 text-foreground border border-border rounded-2xl font-bold hover:bg-secondary transition-all active:scale-95 cursor-pointer"
+                        >
+                            No, cancelar
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        )}
         </footer>
 
       </div>
