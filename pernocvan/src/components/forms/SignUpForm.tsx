@@ -25,11 +25,8 @@ export default function SignUpForm() {
     const isFormInvalid = !acceptedTerms || !acceptedPrivacy;
     
     const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
         username: "",
         email: "",
-        confirmEmail: "",
         password: "",
         confirmPassword: "",
     });
@@ -50,14 +47,13 @@ export default function SignUpForm() {
         if (name === "password") calculateStrength(value);
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+   const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
-        // 1. Validación de campos obligatorios (Si están vacíos tras quitar espacios)
+        // 1. Validación de campos obligatorios REALES (Solo los 4 que se ven en tu pantalla)
         if (
             !formData.username.trim() || 
             !formData.email.trim() || 
-            !formData.confirmEmail.trim() || 
             !formData.password.trim() || 
             !formData.confirmPassword.trim()
         ) {
@@ -65,11 +61,18 @@ export default function SignUpForm() {
             return;
         }
         
-        // 2. Validación de correos
-        if (formData.email.trim() !== formData.confirmEmail.trim()) {
-            toast.error("Los correos electrónicos no coinciden");
+        // 1.5. Filtro antibugs para el username (frena la 'ñ', acentos y espacios)
+        const regexUsernameValido = /^[a-zA-Z0-9_-]+$/;
+        if (!regexUsernameValido.test(formData.username.trim())) {
+            toast.error("El nombre de usuario no puede contener la 'ñ', acentos, espacios ni caracteres especiales");
             return;
         }
+
+        // 2. Validación de correos
+        // if (formData.email.trim() !== formData.confirmEmail.trim()) {
+        //     toast.error("Los correos electrónicos no coinciden");
+        //     return;
+        // }
 
         // 3. Validación de contraseñas
         if (formData.password.trim() !== formData.confirmPassword.trim()) {
@@ -83,26 +86,24 @@ export default function SignUpForm() {
             return;
         }
 
-        // Si pasa todas las aduanas, entonces cargamos
+        // Si pasa las aduanas, activamos el estado de carga
         setIsLoading(true);
         console.log("Iniciando registro en Supabase para:", formData.email);
         
-        // CONEXIÓN REAL A SUPABASE 
+        // CONEXIÓN REAL A SUPABASE
         try {
             const { data, error } = await supabase.auth.signUp({
-                // Añadimos .trim() aquí para limpiar espacios invisibles
                 email: formData.email.trim(), 
                 password: formData.password.trim(),
                 options: {
                     data: {
-                        // Limpiamos también el nombre de usuario por si acaso
-                        username: formData.username.trim(), 
+                        // Enviamos solo el username, que es tu campo real
+                        username: formData.username.trim()
                     }
                 }
             });
 
             if (error) {
-                // Mensajes de error amigables
                 if (error.message.includes("already registered") || error.message.includes("already exists")) {
                     toast.error("Este correo ya está registrado.");
                 } else {
@@ -111,15 +112,15 @@ export default function SignUpForm() {
                 return; 
             }
 
-            // Éxito
+            // Éxito total
             toast.success("¡Cuenta creada con éxito!");
             console.log("Usuario creado en DB:", data.user);
             
             navigate("/login");
 
         } catch (err) {
-            console.error("Error inesperado:", err);
-            toast.error("Ocurrió un error inesperado de conexión.");
+            console.error("Error inesperado en el formulario:", err);
+            toast.error("Ocurrió un error inesperado al procesar los datos.");
         } finally {
             setIsLoading(false);
         }
@@ -128,13 +129,15 @@ export default function SignUpForm() {
     return (
         <div className="flex justify-center bg-background pt-10 pb-40 px-4">
         <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-2xl border border-border bg-card p-10 shadow-sm">
-            {/* Header */}
+            
+            {/* Cabecera */}
             <div className="mb-6 space-y-2 text-center">
                 <h2 className="text-4xl font-bold tracking-tight text-primary">Crea una cuenta</h2>
                 <p className="text-lg text-muted-foreground">Únete para empezar a viajar</p>
             </div>
 
             <div className="space-y-5">
+
             {/* FORMULARIO */}
             <div className="space-y-2">
                 <div className="flex items-center">
@@ -172,13 +175,14 @@ export default function SignUpForm() {
                 <div className="space-y-2">
                     <div className="flex items-center">
                     <label className="text-sm font-medium text-foreground">Confirmar contraseña <span className="text-red-500">*</span></label></div>
+                    
                     <div className="relative">
-                        <Input className="h-12 text-lg"  type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Repite tu contraseña" value={formData.confirmPassword} onChange={handleChange} />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer transition-colors">
-                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                        </button>
-                        
+                    <Input className="h-12 text-lg pr-12" type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Repite tu contraseña" value={formData.confirmPassword} onChange={handleChange} />
+    
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer transition-colors">
+                        {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
                         Mínimo 8 caracteres, una mayúscula, un número y un símbolo (ej: !, @, #, $).
@@ -198,7 +202,7 @@ export default function SignUpForm() {
 
             </div>
 
-            {/* CHECKBOXES LEGALES */}
+            {/* CHECKBOXES */}
             <div className="space-y-3 pt-2">
                 <div className="flex items-center space-x-2">
                     <div className="flex items-center">
@@ -220,7 +224,9 @@ export default function SignUpForm() {
             </div>
 
             
-            <Button disabled={isLoading}
+            <Button 
+            type="submit"
+            disabled={isLoading}
                 className={`w-full h-12 text-lg font-semibold transition-all flex items-center justify-center gap-2 mt-8
                         bg-primary hover:bg-primary/90 
                         ${isFormInvalid ? "cursor-not-allowed opacity-90" : "cursor-pointer"} 
