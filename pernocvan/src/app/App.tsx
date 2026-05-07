@@ -8,6 +8,8 @@ import { SignUpPage } from '../pages/SignUpPage';
 import Profile from '../pages/Profile';
 import ResetPassword from '@/pages/ResetPassword';
 import { AdminPage } from '@/pages/AdminPage';
+import { TermsPage } from '@/pages/TermsPage';
+import { PrivacyPage } from '@/pages/PrivacyPage';
 
 
 function App() {
@@ -24,6 +26,9 @@ function App() {
 
         
         <Route path="/admin" element={<AdminPage />} />
+
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         
       </Routes>
     </AppLayout>

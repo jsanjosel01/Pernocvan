@@ -273,6 +273,7 @@ const handleComentar = () => {
       
       {/* BUSCADOR + BOTÓN AFINAR  */}
       <div className="fixed top-40 left-10 z-[50] flex flex-col gap-3 w-[340px] pointer-events-auto">
+        
         <form onSubmit={buscarCiudad} className="bg-white rounded-full px-6 py-4 flex items-center shadow-lg border border-zinc-100">
           <input 
             type="text" placeholder="¿A dónde vamos?" 
