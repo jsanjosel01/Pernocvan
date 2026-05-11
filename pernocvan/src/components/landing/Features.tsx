@@ -34,7 +34,7 @@ export const Features = () => {
             Todo lo que necesitas para tu viaje
           </h2>
           <p className="mt-5 max-w-2xl text-xl text-gray-600 mx-auto leading-relaxed">
-            VanLife está diseñado para hacer tu vida camper mucho más fácil, segura y conectada.
+             Haciéndote la vida camper mucho más fácil, segura y conectada.
           </p>
         </div>
 
