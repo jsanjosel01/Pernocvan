@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import { supabase } from '../database/supabase/client';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSearchParams } from 'react-router-dom';
-import { MapIcon, Minus, Plus, Satellite } from 'lucide-react';
+import { LocateFixed, MapIcon, Minus, Plus, Satellite } from 'lucide-react';
 
 // Función para capitalizar cada palabra (Ej: "LISBOA, PORTUGAL" -> "Lisboa, Portugal")
 const capitalizar = (str: string) => {
@@ -67,7 +67,7 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const mapRef = useRef<any>(null);
 
   // Estados de Ubicación y Mapa
-  const [posicionMapa, setPosicionMapa] = useState<[number, number]>([40.4167, -3.70325]); // Centro de España por defecto
+  const [posicionMapa, setPosicionMapa] = useState<[number, number]>([40.4167, -3.70325]); // Madrid por defecto
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [cargando, setCargando] = useState(false);
@@ -379,6 +379,25 @@ const handleComentar = () => {
     }
 
 
+// Funcion para localizar al usuario usando el GPS del navegador
+  const localizarUsuario = () => {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const nuevaPos: [number, number] = [position.coords.latitude, position.coords.longitude];
+        setPosicionMapa(nuevaPos);
+        mapRef.current?.flyTo(nuevaPos, 14);
+      },
+      (error) => {
+        if (error.code === 1) {
+          mostrarNotificacion("📍 Permiso denegado. Actívalo en el candado de la URL.");
+        }
+      }
+    );
+  }
+};
+
+
 
   return (
     <div className="relative h-screen w-full bg-zinc-100 overflow-hidden font-sans">
@@ -404,6 +423,7 @@ const handleComentar = () => {
           <span>Afinar la búsqueda</span>
           <span className={`transition-transform duration-300 ${mostrarFiltros ? 'rotate-180' : ''}`}>⚙️</span>
         </button>
+
 
         {/* MODAL FILTROS */}
         {mostrarFiltros && (
@@ -585,7 +605,6 @@ const handleComentar = () => {
 
                 <div className="space-y-6">
                   {/* Ubicación Estilizada */}
-
                       {selectedPoint.direccion && 
 
                   <div className="flex items-start gap-3">
@@ -660,6 +679,17 @@ const handleComentar = () => {
 
     {/* SELECTOR DE CAPA Y ZOOM (Derecha) */}
     <div className="fixed top-40 right-10 z-[50] flex flex-col gap-5 pointer-events-auto">
+
+      {/* Botón de Mi Ubicación */}
+        <button 
+          onClick={localizarUsuario}
+          className="w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 border-transparent bg-white/90 text-zinc-400 hover:text-[#e03b4b] hover:bg-white active:scale-90"
+        >
+          <LocateFixed size={20} strokeWidth={2.5} />
+          <span className="text-[7px] font-black uppercase mt-1">Mi posición</span>
+        </button>
+
+      
       <div className="flex flex-col gap-2">
         <button 
           onClick={() => setModoMapa('calle')}
