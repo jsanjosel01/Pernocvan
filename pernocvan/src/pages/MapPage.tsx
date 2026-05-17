@@ -7,10 +7,12 @@ import 'leaflet/dist/leaflet.css';
 // CONFIGURACIÓN DE ICONOS 
 import { supabase } from '../database/supabase/client';
 import { useAuthStore } from '../store/useAuthStore';
-import { useSearchParams } from 'react-router-dom';
-import { LocateFixed, MapIcon, Minus, Plus, Satellite } from 'lucide-react';
+import { useSearchParams, useNavigate  } from 'react-router-dom';
+import { Link, LocateFixed, MapIcon, Minus, Plus, Satellite } from 'lucide-react';
 
-// Función para capitalizar cada palabra (Ej: "LISBOA, PORTUGAL" -> "Lisboa, Portugal")
+
+
+// Función para capitalizar 
 const capitalizar = (str: string) => {
   if (!str) return "";
   return str.toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
@@ -87,6 +89,39 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [sugerencias, setSugerencias] = useState<any[]>([]);
   const [mostrarListaSugerencias, setMostrarListaSugerencias] = useState(false);
+
+  // --- ESTADOS PARA EL PANEL DE RUTA ---
+  const navigate = useNavigate();
+  const [mostrarPanelRuta, setMostrarPanelRuta] = useState(false);
+  const [origen, setOrigen] = useState("");
+  const [destino, setDestino] = useState("");
+
+
+  useEffect(() => {
+  const sincronizarSesion = async () => {
+    // 1. Preguntamos a Supabase por la sesión en caché
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Solo actualizamos la propiedad que tu mapa lee: isAuthenticated
+      useAuthStore.setState({ isAuthenticated: true });
+      console.log("🟢 Sesión recuperada de Supabase con éxito.");
+    }
+
+    // 2. Escuchamos cambios de sesión en vivo (Login / Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        useAuthStore.setState({ isAuthenticated: true });
+      } else {
+        useAuthStore.setState({ isAuthenticated: false });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  };
+
+  sincronizarSesion();
+}, []);
 
   
 
@@ -213,26 +248,26 @@ const handleEnviarComentario = async () => {
   
 
   // función que gestiona el clicK
-const handleComentar = () => {
-  // Antes decía !isLoggedIn, ahora debe decir !isAuthenticated
-  if (!isAuthenticated) { 
-    mostrarNotificacion("⚠️ Debes estar registrado para poder opinar.");
-  } else {
-    setIsWritingComment(true); 
-  }
-};
-
-  useEffect(() => {
-  if (selectedPoint) {
-    setViewMode('preview');
-  }
-}, [selectedPoint]);// Puede ser 'preview' o 'full'
-
-  {/* Función para mostrar notificaciones temporales */}
-  const mostrarNotificacion = (mensaje: string) => {
-    setMensajeFlotante(mensaje);
-    setTimeout(() => setMensajeFlotante(""), 4500);
+  const handleComentar = () => {
+    // Antes decía !isLoggedIn, ahora debe decir !isAuthenticated
+    if (!isAuthenticated) { 
+      mostrarNotificacion("⚠️ Debes estar registrado para poder opinar.");
+    } else {
+      setIsWritingComment(true); 
+    }
   };
+
+    useEffect(() => {
+    if (selectedPoint) {
+      setViewMode('preview');
+    }
+  }, [selectedPoint]);// Puede ser 'preview' o 'full'
+
+    {/* Función para mostrar notificaciones temporales */}
+    const mostrarNotificacion = (mensaje: string) => {
+      setMensajeFlotante(mensaje);
+      setTimeout(() => setMensajeFlotante(""), 4500);
+    };
 
   {/* Función para buscar la ciudad usando Nominatim y volar el mapa */}
   const buscarCiudad = async (e?: React.FormEvent) => {
@@ -399,6 +434,8 @@ const handleComentar = () => {
 
 
 
+
+
   return (
     <div className="relative h-screen w-full bg-zinc-100 overflow-hidden font-sans">
       
@@ -423,7 +460,6 @@ const handleComentar = () => {
           <span>Afinar la búsqueda</span>
           <span className={`transition-transform duration-300 ${mostrarFiltros ? 'rotate-180' : ''}`}>⚙️</span>
         </button>
-
 
         {/* MODAL FILTROS */}
         {mostrarFiltros && (
@@ -464,6 +500,91 @@ const handleComentar = () => {
         )}
 
 
+        {/* PLANIFICAR VIAJE */}
+<div className="flex flex-col gap-2">
+  <button 
+    onClick={() => {
+      setMostrarPanelRuta(!mostrarPanelRuta);
+      setMostrarFiltros(false); // Auto-cierre de filtros al abrir ruta
+    }} 
+    className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all"
+  >
+    <span>Planificar un viaje</span>
+    <MapIcon size={18} className="text-[#e03b4b]" />
+  </button>
+
+  {mostrarPanelRuta && (
+    <div className="bg-white p-6 rounded-[32px] shadow-2xl animate-in slide-in-from-top-2 duration-300 border border-zinc-100">
+      
+      {/* CAMPOS DE TEXTO */}
+      <div className="space-y-3">
+        <input 
+          placeholder="Salida..." 
+          className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
+          value={origen}
+          onChange={(e) => setOrigen(capitalizar(e.target.value))}
+        />
+        <input 
+          placeholder="Llegada..." 
+          className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
+          value={destino}
+          onChange={(e) => setDestino(capitalizar(e.target.value))}
+        />
+      </div>
+
+      {/* LÓGICA DE CONTROL DE SESIÓN Y CAMPOS */}
+      {!isAuthenticated ? (
+        /* CASO 1: NO HAY SESIÓN INICIADA -> OBLIGAR A REGISTRARSE/LOGUEARSE */
+        <div className="mt-5 p-4 bg-red-50/50 rounded-2xl border border-dashed border-red-200 text-center">
+          <p className="text-[11px] text-zinc-600 mb-3 leading-snug font-medium">
+            Para poder planificar y guardar tus rutas personalizadas necesitas tener una cuenta.
+          </p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="w-full bg-white text-zinc-900 border border-zinc-200 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-zinc-50 transition-all shadow-sm"
+          >
+            Iniciar sesión o Registrarse
+          </button>
+        </div>
+      ) : (
+        /* CASO 2: SÍ HAY SESIÓN INICIADA */
+        <div className="mt-4">
+          {(!origen.trim() || !destino.trim()) ? (
+            /* SI ESTÁ LOGUEADO PERO CAMPOS VACÍOS: LE AVISAMOS */
+            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center mb-3">
+              <p className="text-[10px] text-zinc-500 font-medium">
+                Introduce un punto de salida y llegada para activar la ruta.
+              </p>
+            </div>
+          ) : null}
+
+          <button 
+            onClick={() => {
+              // Aquí llamaremos a la función que conecta con Supabase
+              console.log("Guardando ruta:", { origen, destino });
+              mostrarNotificacion?.("📍 ¡Guardando ruta en Supabase!");
+            }}
+            disabled={!origen.trim() || !destino.trim()}
+            className={`w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg active:scale-95 ${
+              (!origen.trim() || !destino.trim())
+                ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none active:scale-100'
+                : 'bg-[#e03b4b] hover:bg-red-600 text-white'
+            }`}
+          >
+            Guardar ruta en mi perfil
+          </button>
+        </div>
+      )}
+    </div>
+  )}
+</div>
+</div>
+
+
+
+        
+
+
       {/* LISTA DE RESULTADOS (Solo aparece si hay puntos) */}
       {puntos.length > 0 && (
         <div className="relative flex-1 overflow-y-auto mt-4 border-t border-zinc-100 pt-4 max-h-[50vh] bg-zinc-50 rounded-b-3xl p-4">
@@ -500,7 +621,7 @@ const handleComentar = () => {
         </div>
       )}
 
-      </div>
+      
       {/* Cargando, mensaje */}
       {cargando && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[3000] bg-white/95 px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 border border-zinc-100">
