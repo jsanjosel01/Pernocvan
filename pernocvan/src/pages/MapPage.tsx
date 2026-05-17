@@ -11,6 +11,8 @@ import { useSearchParams, useNavigate  } from 'react-router-dom';
 import { LocateFixed, MapIcon, MapPin, Minus, Plus, Satellite, Search, Settings2, X } from 'lucide-react';
 
 
+
+
 // Función para capitalizar 
 const capitalizar = (str: string) => {
   if (!str) return "";
@@ -30,19 +32,29 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+
 // TIPOS DE LUGAR (Definimos colores y queries)
 const tiposLugar = [
-  { id: 'area_ac', icono: '🚐', nombre: 'Área AC', color: 'bg-zinc-900', query: 'node["amenity"="motorhome_stopover"]; way["amenity"="motorhome_stopover"]; node["tourism"="caravan_site"]; way["tourism"="caravan_site"];' },
-  { id: 'camping', icono: '🏕️', nombre: 'Camping', color: 'bg-green-600', query: 'node["tourism"="camp_site"]; way["tourism"="camp_site"];' },
-  { id: 'parking', icono: '🅿️', nombre: 'Parking', color: 'bg-blue-600', query: 'node["amenity"="parking"]; way["amenity"="parking"];' }, 
-  { id: 'gasolinera', icono: '⛽', nombre: 'Gasolinera', color: 'bg-red-600', query: 'node["amenity"="fuel"]; way["amenity"="fuel"];' },
-  { id: 'spot', icono: '🌲', nombre: 'Naturaleza', color: 'bg-emerald-700', query: 'node["leisure"="park"]; way["leisure"="park"]; node["leisure"="garden"]; way["leisure"="garden"]; node["tourism"="viewpoint"];' },
+  // Sección 1: Lugares principales
+  { id: 'area_ac', icono: '🚐', nombre: 'Área AC', color: 'bg-zinc-900', seccion: 'principal', query: 'node["amenity"="motorhome_stopover"]; way["amenity"="motorhome_stopover"]; node["tourism"="caravan_site"]; way["tourism"="caravan_site"];' },
+  { id: 'camping', icono: '🏕️', nombre: 'Camping', color: 'bg-green-600', seccion: 'principal', query: 'node["tourism"="camp_site"]; way["tourism"="camp_site"];' },
+  { id: 'parking', icono: '🅿️', nombre: 'Parking', color: 'bg-blue-600', seccion: 'principal', query: 'node["amenity"="parking"]; way["amenity"="parking"];' }, 
+  { id: 'gasolinera', icono: '⛽', nombre: 'Gasolinera', color: 'bg-red-600', seccion: 'principal', query: 'node["amenity"="fuel"]; way["amenity"="fuel"];' },
+  { id: 'spot', icono: '🌲', nombre: 'Naturaleza', color: 'bg-emerald-700', seccion: 'principal', query: 'node["leisure"="park"]; way["leisure"="park"]; node["leisure"="garden"]; way["leisure"="garden"]; node["tourism"="viewpoint"];' },
   
-  // 🟢 NUEVOS FILTROS VANLIFE:
-  { id: 'ducha', icono: '🚿', nombre: 'Duchas', color: 'bg-cyan-500', query: 'node["amenity"="shower"]; way["amenity"="shower"];' },
-  { id: 'monumento', icono: '🏛️', nombre: 'Cultura y Monumentos', color: 'bg-amber-600', query: 'node["tourism"="attraction"]; way["tourism"="attraction"]; node["historic"]; way["historic"];' },
-  { id: 'agua', icono: '💧', nombre: 'Agua Potable', color: 'bg-sky-600', query: 'node["amenity"="drinking_water"];' },
-  { id: 'supermercado', icono: '🛒', nombre: 'Supermercados', color: 'bg-purple-600', query: 'node["shop"="supermarket"]; way["shop"="supermarket"];' }
+  // Sección 2: Servicios adicionales
+  { id: 'servicio_agua', icono: '💧', nombre: 'Agua Potable', color: 'bg-sky-600', seccion: 'servicio', query: 'node["amenity"="drinking_water"];' },
+  { id: 'servicio_ducha', icono: '🚿', nombre: 'Duchas', color: 'bg-cyan-500', seccion: 'servicio', query: 'node["amenity"="shower"]; way["amenity"="shower"];' },
+  // { id: 'servicio_electricidad', icono: '⚡', nombre: 'Electricidad', color: 'bg-yellow-500', seccion: 'servicio', query: 'node["power"="outlet"];' },
+  { id: 'servicio_wc', icono: '🚻', nombre: 'Baños / WC', color: 'bg-stone-500', seccion: 'servicio', query: 'node["amenity"="toilets"]; way["amenity"="toilets"];' },
+  { id: 'servicio_wifi', icono: '📶', nombre: 'Wifi', color: 'bg-indigo-500', seccion: 'servicio', query: 'node["internet_access"="wlan"];' },
+  { id: 'servicio_lavanderia', icono: '🧺', nombre: 'Lavandería', color: 'bg-pink-500', seccion: 'servicio', query: 'node["amenity"="launderette"]; way["amenity"="launderette"];' },
+  { id: 'servicio_picnic', icono: '🪵', nombre: 'Zona de Pícnic', color: 'bg-orange-700', seccion: 'servicio', query: 'node["leisure"="picnic_table"]; way["leisure"="picnic_table"]; node["tourism"="picnic_site"]; way["tourism"="picnic_site"];' },
+  { id: 'servicio_basura', icono: '🗑️', nombre: 'Contenedores', color: 'bg-teal-600', seccion: 'servicio', query: 'node["amenity"="waste_disposal"]; node["amenity"="waste_basket"];' },
+  { id: 'servicio_vaciado', icono: '🚰', nombre: 'Vaciado de Aguas', color: 'bg-lime-600', seccion: 'servicio', query: 'node["amenity"="sanitary_dump_station"]; way["amenity"="sanitary_dump_station"];' },
+  { id: 'servicio_mascotas', icono: '🐾', nombre: 'Admite Mascotas', color: 'bg-amber-700', seccion: 'servicio', query: 'node["dog"="yes"]; way["dog"="yes"];' },
+  { id: 'servicio_salud', icono: '🏥', nombre: 'Farmacias y Salud', color: 'bg-rose-600', seccion: 'servicio', query: 'node["amenity"="pharmacy"]; node["amenity"="hospital"];' },
+  { id: 'servicio_carga', icono: '🔌', nombre: 'Puntos de Carga EV', color: 'bg-cyan-600', seccion: 'servicio', query: 'node["amenity"="charging_station"]; way["amenity"="charging_station"];' }
 ];
 
 // FUNCION PARA EL TAMAÑO DEL MAPA
@@ -81,11 +93,13 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   // Estados de Ubicación y Mapa
   const [posicionMapa, setPosicionMapa] = useState<[number, number]>([40.4167, -3.70325]); // Madrid por defecto
   const [textoBusqueda, setTextoBusqueda] = useState("");
+  const [verMasFiltros, setVerMasFiltros] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [puntos, setPuntos] = useState<any[]>([]);
   const [filtrosActivos, setFiltrosActivos] = useState<string[]>([]); 
   const [mensajeFlotante, setMensajeFlotante] = useState("");
+
 
   // Estados de Detalle y Comentarios
   const [selectedPoint, setSelectedPoint] = useState<any>(null);
@@ -120,14 +134,10 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [rutaPintada, setRutaPintada] = useState(false);
 
 
-  
-
-
-
   // Sincronización de sesión (Rutas y Comentarios dependen de esto)
   useEffect(() => {
   const sincronizarSesion = async () => {
-    // 1. Preguntamos a Supabase por la sesión en caché
+    // Preguntamos a Supabase por la sesión en caché
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session) {
@@ -136,7 +146,7 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
       
     }
 
-    // 2. Escuchamos cambios de sesión en vivo (Login / Logout)
+    // Escuchamos cambios de sesión en vivo (Login / Logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         useAuthStore.setState({ isAuthenticated: true });
@@ -177,11 +187,12 @@ const trazarRutaPorCarretera = async (latOrigen: number, lonOrigen: number, latD
   }
 };
 
+// Función para procesar el origen y destino, obtener sus coordenadas y trazar la ruta
 const procesarYMostrarRuta = async () => {
-  // 🔐 EL CANDADO DEFINITIVO: Si el usuario NO está autenticado, cortamos el grifo de raíz
+  // Si el usuario NO está autenticado, cortamos el grifo de raíz
   if (!isAuthenticated) {
-    mostrarNotificacion("⚠️ Debes iniciar sesión para poder planificar y guardar rutas.");
-    return; // 🛑 Frenazo en seco. No hace fetches, no busca en Nominatim, no gasta API.
+    mostrarNotificacion("Debes iniciar sesión para poder planificar y guardar rutas.");
+    return; 
   }
 
   if (!origen.trim() || !destino.trim()) return;
@@ -240,15 +251,7 @@ useEffect(() => {
 }, [origen, destino]);
 
 
-  // Si el usuario cambia el origen o el destino, reiniciamos el botón para que pueda volver a guardar
-  useEffect(() => {
-    setInfoGuardado({ registrado: false, hora: "" });
-  }, [origen, destino]);
-
-
-  
-
-  // 1) Obtener ubicación GPS del usuario al entrar
+// 1) Obtener ubicación GPS del usuario al entrar
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -270,11 +273,11 @@ useEffect(() => {
   }, [locationParam]);
 
 
-  //  2) Vuelo inmersivo si venimos desde el buscador del Hero
+  // 2) Vuelo inmersivo si venimos desde el buscador del Hero
   useEffect(() => {
     // Si no hay ciudad en la URL, no hacemos nada
-    if (!locationParam) return;
-
+    if (!locationParam)
+      return;
     setTextoBusqueda(locationParam);
 
     const irALaCiudad = async () => {
@@ -332,14 +335,13 @@ useEffect(() => {
   };
 
   
-
-  const timeoutId = setTimeout(buscarSugerencias, 300); // Esperamos un poco para no saturar la API
+// Esperamos un poco para no saturar la API con cada letra que el usuario escribe
+  const timeoutId = setTimeout(buscarSugerencias, 300);
   return () => clearTimeout(timeoutId);
 }, [textoBusqueda]);
 
 
-
-  // Función para cargar los comentarios
+// Función para cargar los comentarios
 const fetchComentarios = async () => {
   const { data, error } = await supabase
     .from('comentarios')
@@ -374,7 +376,7 @@ const fetchComentarios = async () => {
   const handleComentar = () => {
     // Antes decía !isLoggedIn, ahora debe decir !isAuthenticated
     if (!isAuthenticated) { 
-      mostrarNotificacion("⚠️ Debes estar registrado para poder opinar.");
+      mostrarNotificacion("Debes estar registrado para poder opinar.");
     } else {
       setIsWritingComment(true); 
     }
@@ -441,76 +443,79 @@ const fetchComentarios = async () => {
       const data = await response.json();
       
       const nuevosPuntos = data.elements.filter((el: any) => el.lat || el.center).map((el: any) => {
-      const tags = el.tags || {};
-      let tipoAsignado = '';
+        const tags = el.tags || {};
+        let tipoAsignado = '';
 
-      // 1. PRIORIDAD MÁXIMA: Si es gasolinera, que sea roja.
-      if (tags.amenity === 'fuel') {
-        tipoAsignado = 'gasolinera';
-      } 
-      // 2. Si es un parque o jardín
-      else if (tags.leisure === 'park' || tags.leisure === 'garden' || tags.tourism === 'viewpoint') {
-        tipoAsignado = 'spot';
-      } 
-      // 3. Si es aparcamiento
-      else if (tags.amenity === 'parking') {
-        tipoAsignado = 'parking';
-      } 
-      // 4. Si es camping
-      else if (tags.tourism === 'camp_site') {
-        tipoAsignado = 'camping';
-      } 
-      // 5. Si es área AC
-      else if (tags.amenity === 'motorhome_stopover' || tags.tourism === 'caravan_site') {
-        tipoAsignado = 'area_ac';
-      } 
-      else if (tags.amenity === 'shower') { 
-        tipoAsignado = 'ducha';
-      }
-      else if (tags.tourism === 'attraction' || tags.historic) { 
-        tipoAsignado = 'monumento';
-      }
-      else if (tags.amenity === 'drinking_water') {
-        tipoAsignado = 'agua';
-      }
-      else if (tags.shop === 'supermarket') { 
-        tipoAsignado = 'supermercado';
-      }
-      else {
-        tipoAsignado = 'spot'; // Por defecto
-      }
+        if (tags.amenity === 'shower') { 
+          tipoAsignado = 'servicio_ducha';
+        }
+        else if (tags.amenity === 'drinking_water') {
+          tipoAsignado = 'servicio_agua';
+        }
+        // else if (tags.power === 'outlet') {
+        //   tipoAsignado = 'servicio_electricidad';
+        // }
+        else if (tags.amenity === 'toilets') {
+          tipoAsignado = 'servicio_wc';
+        }
+        else if (tags.internet_access === 'wlan' || tags.internet_access === 'yes') {
+          tipoAsignado = 'servicio_wifi';
+        }
+        else if (tags.amenity === 'fuel') {
+          tipoAsignado = 'gasolinera';
+        } 
+        else if (tags.amenity === 'parking') {
+          tipoAsignado = 'parking';
+        } 
+        else if (tags.tourism === 'camp_site') {
+          tipoAsignado = 'camping';
+        } 
+        else if (tags.amenity === 'motorhome_stopover' || tags.tourism === 'caravan_site') {
+          tipoAsignado = 'area_ac';
+        } 
+        else if (tags.leisure === 'park' || tags.leisure === 'garden' || tags.tourism === 'viewpoint') {
+          tipoAsignado = 'spot';
+        } 
+        else if (tags.leisure === 'picnic_table' || tags.tourism === 'picnic_site') tipoAsignado = 'servicio_picnic';
+        else if (tags.amenity === 'waste_disposal' || tags.amenity === 'waste_basket') tipoAsignado = 'servicio_basura';
+        else if (tags.amenity === 'sanitary_dump_station') tipoAsignado = 'servicio_vaciado';
+        else if (tags.dog === 'yes') tipoAsignado = 'servicio_mascotas';
 
+        else if (tags.amenity === 'pharmacy' || tags.amenity === 'hospital') tipoAsignado = 'servicio_salud';
+        else if (tags.amenity === 'charging_station') tipoAsignado = 'servicio_carga';
 
-      return {
-        id: el.id,
-        lat: el.lat || el.center.lat,
-        lon: el.lon || el.center.lon,
-        nombre: tags.name || (tiposLugar.find(t => t.id === tipoAsignado)?.nombre || "Lugar"),
-        tipo: tipoAsignado,
-        telefono: tags.phone,
-        web: tags.website,
-        descripcion: tags.description || tags["description:es"] || tags.note,
-        tags: tags,
+        else {
+          tipoAsignado = 'spot'; // Por defecto
+        }
 
-        direccion: [
-        tags["addr:housenumber"],
-        tags["addr:street"],
-        tags["addr:postcode"],
-        tags["addr:city"]
-      ].filter(Boolean).join(", ")
-
-      };
-      
-}); 
-
+        return {
+          id: el.id,
+          lat: el.lat || el.center.lat,
+          lon: el.lon || el.center.lon,
+          nombre: tags.name || (tiposLugar.find(t => t.id === tipoAsignado)?.nombre || "Lugar"),
+          tipo: tipoAsignado,
+          telefono: tags.phone,
+          web: tags.website,
+          descripcion: tags.description || tags["description:es"] || tags.note,
+          tags: tags,
+          direccion: [
+            tags["addr:housenumber"],
+            tags["addr:street"],
+            tags["addr:postcode"],
+            tags["addr:city"]
+          ].filter(Boolean).join(", ")
+        };
+      });
 
       setPuntos(nuevosPuntos);
     } catch (error) {
+      console.error("Error al cargar los puntos:", error);
       mostrarNotificacion("Error al cargar los puntos.");
     } finally {
       setCargando(false);
     }
-  };
+  }; 
+
 
   { /* Función para alternar filtros visualmente */ }
   const toggleFiltroVisual = (id: string) => {
@@ -541,7 +546,6 @@ const fetchComentarios = async () => {
 }, []);
 
 
-
   // Definimos las capas
     const capas = {
       calle: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
@@ -569,7 +573,7 @@ const fetchComentarios = async () => {
       },
       (error) => {
         if (error.code === 1) {
-          mostrarNotificacion("📍 Permiso denegado. Actívalo en el candado de la URL.");
+          mostrarNotificacion(" Permiso denegado. Actívalo el GPS.");
         }
       }
     );
@@ -704,11 +708,13 @@ useEffect(() => {
           >
             {/* SCROLL INTERNO */}
             <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar"> 
+              
+              {/*  TIPOS DE LUGAR PRINCIPALES */}
               <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">
                 Tipos de lugar
               </h3>
               <div className="flex flex-col gap-1.5 pb-2">
-                {tiposLugar.map(f => (
+                {tiposLugar.filter(t => t.seccion === 'principal').map(f => (
                   <label 
                     key={f.id} 
                     className={`cursor-pointer flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] ${
@@ -727,7 +733,7 @@ useEffect(() => {
                     <span className="text-xl flex-shrink-0 select-none">{f.icono}</span>
                     <span className="flex-1 font-bold text-zinc-700 text-xs tracking-tight">{f.nombre}</span>
                     
-                    {/* Check redondo e interactivo */}
+                    {/* Check redondo e interactivo original */}
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer ${
                       filtrosActivos.includes(f.id) 
                         ? 'bg-zinc-900 border-zinc-900 scale-110 shadow-sm' 
@@ -740,6 +746,77 @@ useEffect(() => {
                   </label>
                 ))}
               </div>
+
+              
+              {/* SERVICIOS E INSTALACIONES */}
+              {verMasFiltros && (
+                <div className="flex flex-col gap-1.5 pb-2 animate-in fade-in-50 duration-200">
+                  <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 mt-2">
+                    Servicios e instalaciones
+                  </h3>
+                  {tiposLugar.filter(t => t.seccion === 'servicio').map(f => (
+                    <label 
+                      key={f.id} 
+                      className={`cursor-pointer flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] ${
+                        filtrosActivos.includes(f.id) 
+                          ? 'border-zinc-900 bg-zinc-50/80 shadow-sm' 
+                          : 'border-zinc-100 bg-white hover:border-zinc-200'
+                      }`}
+                    >
+                      <input 
+                        type="checkbox" 
+                        className="hidden" 
+                        checked={filtrosActivos.includes(f.id)} 
+                        onChange={() => toggleFiltroVisual(f.id)} 
+                      />
+                      
+                      <span className="text-xl flex-shrink-0 select-none">{f.icono}</span>
+                      <span className="flex-1 font-bold text-zinc-700 text-xs tracking-tight">{f.nombre}</span>
+                      
+                      {/* Check redondo e interactivo idéntico */}
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                        filtrosActivos.includes(f.id) 
+                          ? 'bg-zinc-900 border-zinc-900 scale-110 shadow-sm' 
+                          : 'border-zinc-300 bg-white'
+                      }`}>
+                        {filtrosActivos.includes(f.id) && (
+                          <div className="w-1.5 h-1.5 bg-white rounded-full animate-in zoom-in-50 duration-150"></div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+            </div>
+
+            {/* 🔽 BOTÓN EXPANDIBLE DE SERVICIOS (Totalmente libre, sin candados) */}
+            {/* ↕️ CONTENEDOR EN LÍNEA: MÁS FILTROS (+) Y RESTABLECER (-) */}
+            <div className="flex gap-3 w-[92%] mx-auto my-4">
+              
+              {/* BOTÓN EXPANDIBLE (+ / -) */}
+              <button 
+                type="button"
+                onClick={() => setVerMasFiltros(!verMasFiltros)}
+                className="flex-1 text-center py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-dashed border-zinc-200/70 text-[#e03b4b] hover:text-red-700 rounded-xl cursor-pointer active:scale-95"
+              >
+                <span>{verMasFiltros ? '−' : '+'}</span>
+                <span>{verMasFiltros ? 'Ocultar filtros' : 'Más filtros'}</span>
+              </button>
+
+              {/* BOTÓN RESTABLECER */}
+              <button 
+                type="button"
+                onClick={() => {
+                  setFiltrosActivos([]); // Limpia el array de filtros activos de golpe
+                  setVerMasFiltros(false); // Opcional: cierra la sección de servicios
+                }}
+                className="flex-1 text-center py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 rounded-xl cursor-pointer active:scale-95"
+              >
+                <span>🔄</span>
+                <span>Restablecer</span>
+              </button>
+
             </div>
 
             {/* BOTÓN FIJO ABAJO */}
