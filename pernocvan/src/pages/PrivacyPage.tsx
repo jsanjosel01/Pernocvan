@@ -1,9 +1,7 @@
-import { Link } from "react-router-dom";
-
 
 export const PrivacyPage = () => {
   return (
-    // <div className="min-h-screen bg-background pt-32 pb-20 px-6 font-sans">
+    
     <div className="flex justify-center bg-background pt-10 pb-40 px-4">
       <div className="max-w-3xl mx-auto bg-card p-8 md:p-12 rounded-[32px] border border-border shadow-sm">
         <h2 className="text-4xl font-black text-primary mb-8 tracking-tight">Política de Privacidad</h2>

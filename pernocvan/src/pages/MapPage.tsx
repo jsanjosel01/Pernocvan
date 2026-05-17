@@ -8,14 +8,18 @@ import 'leaflet/dist/leaflet.css';
 import { supabase } from '../database/supabase/client';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSearchParams, useNavigate  } from 'react-router-dom';
-import { Link, LocateFixed, MapIcon, Minus, Plus, Satellite } from 'lucide-react';
-
+import { LocateFixed, MapIcon, MapPin, Minus, Plus, Satellite, Search, Settings2, X } from 'lucide-react';
 
 
 // Función para capitalizar 
 const capitalizar = (str: string) => {
   if (!str) return "";
-  return str.toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
+  
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(' ');
 };
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -33,7 +37,12 @@ const tiposLugar = [
   { id: 'parking', icono: '🅿️', nombre: 'Parking', color: 'bg-blue-600', query: 'node["amenity"="parking"]; way["amenity"="parking"];' }, 
   { id: 'gasolinera', icono: '⛽', nombre: 'Gasolinera', color: 'bg-red-600', query: 'node["amenity"="fuel"]; way["amenity"="fuel"];' },
   { id: 'spot', icono: '🌲', nombre: 'Naturaleza', color: 'bg-emerald-700', query: 'node["leisure"="park"]; way["leisure"="park"]; node["leisure"="garden"]; way["leisure"="garden"]; node["tourism"="viewpoint"];' },
-  { id: 'privado', icono: '🏡', nombre: 'Privado', color: 'bg-purple-600', query: 'node["leisure"="garden"];' },
+  
+  // 🟢 NUEVOS FILTROS VANLIFE:
+  { id: 'ducha', icono: '🚿', nombre: 'Duchas', color: 'bg-cyan-500', query: 'node["amenity"="shower"]; way["amenity"="shower"];' },
+  { id: 'monumento', icono: '🏛️', nombre: 'Cultura y Monumentos', color: 'bg-amber-600', query: 'node["tourism"="attraction"]; way["tourism"="attraction"]; node["historic"]; way["historic"];' },
+  { id: 'agua', icono: '💧', nombre: 'Agua Potable', color: 'bg-sky-600', query: 'node["amenity"="drinking_water"];' },
+  { id: 'supermercado', icono: '🛒', nombre: 'Supermercados', color: 'bg-purple-600', query: 'node["shop"="supermarket"]; way["shop"="supermarket"];' }
 ];
 
 // FUNCION PARA EL TAMAÑO DEL MAPA
@@ -61,6 +70,7 @@ const getServicios = (tags: any) => {
 
 
 export const MapPage = () => {
+  
 const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Parámetros de URL y Referencias
@@ -100,6 +110,18 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [coordenadasRuta, setCoordenadasRuta] = useState<[number, number][]>([]);
   // Guarda si la ruta está registrada y a qué hora (Ej: "14:32")
   const [infoGuardado, setInfoGuardado] = useState<{ registrado: boolean; hora: string }>({ registrado: false, hora: "" });
+
+  //  ESTADOS EXCLUSIVOS PARA EL AUTOCOMPLETADO DE LA RUTA
+  const [sugerenciasOrigen, setSugerenciasOrigen] = useState<any[]>([]);
+  const [sugerenciasDestino, setSugerenciasDestino] = useState<any[]>([]);
+  const [mostrarSugOrigen, setMostrarSugOrigen] = useState(false);
+  const [mostrarSugDestino, setMostrarSugDestino] = useState(false);
+
+  const [rutaPintada, setRutaPintada] = useState(false);
+
+
+  
+
 
 
   // Sincronización de sesión (Rutas y Comentarios dependen de esto)
@@ -147,45 +169,75 @@ const trazarRutaPorCarretera = async (latOrigen: number, lonOrigen: number, latD
       }
     } else {
       // Mensaje humanizado
-      mostrarNotificacion("⚠️ No hemos podido calcular el trayecto por carretera entre estos puntos.");
+      mostrarNotificacion(" No hemos podido calcular el trayecto por carretera entre estos puntos.");
     }
   } catch (error) {
     console.error(error);
-    mostrarNotificacion("❌ Ha ocurrido un error al conectar con el servidor de rutas.");
+    mostrarNotificacion(" Ha ocurrido un error al conectar con el servidor de rutas.");
   }
 };
 
 const procesarYMostrarRuta = async () => {
+  // 🔐 EL CANDADO DEFINITIVO: Si el usuario NO está autenticado, cortamos el grifo de raíz
+  if (!isAuthenticated) {
+    mostrarNotificacion("⚠️ Debes iniciar sesión para poder planificar y guardar rutas.");
+    return; // 🛑 Frenazo en seco. No hace fetches, no busca en Nominatim, no gasta API.
+  }
+
   if (!origen.trim() || !destino.trim()) return;
 
   try {
-    // 1. Buscamos las coordenadas de la ciudad de Salida en Nominatim
-    const resO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origen)}&limit=1`);
-    const dataO = await resO.json();
+    // 1. Obtener coordenadas del Origen (forzando España 🇪🇸)
+    const resOrigen = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origen)}&limit=1&countrycodes=es`
+    );
+    const dataOrigen = await resOrigen.json();
 
-    // 2. Buscamos las coordenadas de la ciudad de Llegada en Nominatim
-    const resD = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destino)}&limit=1`);
-    const dataD = await resD.json();
+    // 2. Obtener coordenadas del Destino (forzando España 🇪🇸)
+    const resDestino = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destino)}&limit=1&countrycodes=es`
+    );
+    const dataDestino = await resDestino.json();
 
-    if (dataO.length > 0 && dataD.length > 0) {
-      const latOri = parseFloat(dataO[0].lat);
-      const lonOri = parseFloat(dataO[0].lon);
-      const latDest = parseFloat(dataD[0].lat);
-      const lonDest = parseFloat(dataD[0].lon);
+    if (dataOrigen.length > 0 && dataDestino.length > 0) {
+      const latOrg = parseFloat(dataOrigen[0].lat);
+      const lonOrg = parseFloat(dataOrigen[0].lon);
+      const latDst = parseFloat(dataDestino[0].lat);
+      const lonDst = parseFloat(dataDestino[0].lon);
 
-      // 3. Enviamos las coordenadas numéricas a la función
-      await trazarRutaPorCarretera(latOri, lonOri, latDest, lonDest);
-      
-      // Toast
-      mostrarNotificacion?.(" Buen viaje. ¡Ruta calculada con éxito! ");
-      } else {
-        mostrarNotificacion?.("No hemos podido encontrar alguna de las localidades en el mapa.");
+      // Fetch a la API de OSRM para calcular la carretera
+      const resRuta = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${lonOrg},${latOrg};${lonDst},${latDst}?overview=full&geometries=geojson`
+      );
+      const dataRuta = await resRuta.json();
+
+      if (dataRuta.routes && dataRuta.routes.length > 0) {
+        // Mapeamos las coordenadas para Leaflet [lat, lon]
+        const coordenadas = dataRuta.routes[0].geometry.coordinates.map(
+          (coord: number[]) => [coord[1], coord[0]] as [number, number]
+        );
+        
+        setCoordenadasRuta(coordenadas);
+        setRutaPintada(true);
+
+        // Hace que el mapa se encuadre y enfoque la ruta
+        if (mapRef.current) {
+          mapRef.current.fitBounds(coordenadas);
+        }
       }
-    } catch (error) {
-      console.error(error);
-      mostrarNotificacion?.("No se ha podido cargar el itinerario. Inténtalo de nuevo.");
+    } else {
+      mostrarNotificacion("No se pudieron encontrar las localizaciones en España");
     }
-  };
+  } catch (error) {
+    console.error("Error al procesar la ruta:", error);
+    mostrarNotificacion("Hubo un error al calcular la ruta");
+  }
+};
+
+// Si el usuario cambia el origen o el destino, reiniciamos el botón para que pueda volver a guardar
+useEffect(() => {
+  setInfoGuardado({ registrado: false, hora: "" });
+}, [origen, destino]);
 
 
   // Si el usuario cambia el origen o el destino, reiniciamos el botón para que pueda volver a guardar
@@ -412,6 +464,18 @@ const fetchComentarios = async () => {
       else if (tags.amenity === 'motorhome_stopover' || tags.tourism === 'caravan_site') {
         tipoAsignado = 'area_ac';
       } 
+      else if (tags.amenity === 'shower') { 
+        tipoAsignado = 'ducha';
+      }
+      else if (tags.tourism === 'attraction' || tags.historic) { 
+        tipoAsignado = 'monumento';
+      }
+      else if (tags.amenity === 'drinking_water') {
+        tipoAsignado = 'agua';
+      }
+      else if (tags.shop === 'supermarket') { 
+        tipoAsignado = 'supermercado';
+      }
       else {
         tipoAsignado = 'spot'; // Por defecto
       }
@@ -454,19 +518,28 @@ const fetchComentarios = async () => {
   };
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const panelRutaRef = useRef<HTMLDivElement>(null);
 
+  // Función para cerrar paneles al hacer clic fuera de ellos
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Si el panel existe y el clic está FUERA del panel
-      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        setPuntos([]); // Limpiamos los puntos
-        setMostrarFiltros(false); // Cerramos los filtros
-      }
-    };
+  const handleClickOutside = (event: MouseEvent) => {
+    // 1. Control del panel de filtros
+    if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+      setPuntos([]); // Limpiamos los puntos
+      setMostrarFiltros(false); // Cerramos los filtros
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    // 2. Control del panel de Planificar Viaje
+    if (panelRutaRef.current && !panelRutaRef.current.contains(event.target as Node)) {
+      setMostrarPanelRuta(false); // ...se cierra limpiamente el buscador de rutas
+    }
+  };
+ 
+  // Añadimos el event listener al montar el componente
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
 
 
   // Definimos las capas
@@ -503,7 +576,57 @@ const fetchComentarios = async () => {
   }
 };
 
+// Función sugerencia de busqueda
+const seleccionarSugerenciaBusqueda = (sug: any) => {
+  
+  const nombreCorto = capitalizar(sug.display_name.split(',')[0]);
+  
+  // Guardamos el texto en el input y cerramos la lista desplegable
+  setTextoBusqueda(nombreCorto);
+  setMostrarListaSugerencias(false);
 
+  // Volamos de forma fluida hacia las coordenadas de la ciudad seleccionada
+  if (mapRef.current) {
+    mapRef.current.flyTo([parseFloat(sug.lat), parseFloat(sug.lon)], 14);
+    
+    // Si el usuario ya tenía filtros activos (ej: gasolineras), relanzamos la búsqueda automáticamente al llegar
+    if (filtrosActivos.length > 0) {
+      setTimeout(() => ejecutarBusquedaSitios(true), 1500);
+    }
+  }
+};
+
+
+useEffect(() => {
+  const buscarCiudadesRuta = async () => {
+    // 1. Sugerencias para el origen (Salida) + Filtro de España
+    if (origen.length >= 3 && mostrarSugOrigen) {
+      try {
+        // 🇪🇸 Añadimos &countrycodes=es al final de la URL
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origen)}&limit=4&countrycodes=es`);
+        const data = await res.json();
+        setSugerenciasOrigen(data);
+      } catch (e) { console.error(e); }
+    } else if (origen.length < 3) {
+      setSugerenciasOrigen([]);
+    }
+
+    // 2. Sugerencias para el destino (Llegada) + Filtro de España
+    if (destino.length >= 3 && mostrarSugDestino) {
+      try {
+        // 🇪🇸 Añadimos &countrycodes=es al final de la URL
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destino)}&limit=4&countrycodes=es`);
+        const data = await res.json();
+        setSugerenciasDestino(data);
+      } catch (e) { console.error(e); }
+    } else if (destino.length < 3) {
+      setSugerenciasDestino([]);
+    }
+  };
+
+  const delayDebounce = setTimeout(buscarCiudadesRuta, 300);
+  return () => clearTimeout(delayDebounce);
+}, [origen, destino, mostrarSugOrigen, mostrarSugDestino]);
 
 
 
@@ -511,26 +634,65 @@ const fetchComentarios = async () => {
   return (
     <div className="relative h-screen w-full bg-zinc-100 overflow-hidden font-sans">
       
-      {/* BUSCADOR + BOTÓN AFINAR  */}
-      <div className="fixed top-40 left-10 z-[50] flex flex-col gap-3 w-[340px] pointer-events-auto">
-        
-        <form onSubmit={buscarCiudad} className="bg-white rounded-full px-6 py-4 flex items-center shadow-lg border border-zinc-100">
+    {/* BUSCADOR + BOTÓN AFINAR */}
+    <div className="fixed top-40 left-10 z-[50] flex flex-col gap-3 w-[340px] pointer-events-auto">
+    
+      <div className="relative">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (sugerencias.length > 0) {
+              seleccionarSugerenciaBusqueda(sugerencias[0]);
+            } else {
+              buscarCiudad();
+            }
+          }} 
+          className="bg-white rounded-full px-6 py-4 flex items-center shadow-lg border border-zinc-100 transition-all focus-within:border-zinc-300 focus-within:ring-4 focus-within:ring-zinc-600/5 cursor-pointer"
+        >
           <input 
-            type="text" placeholder="¿A dónde vamos?" 
-            className="flex-1 outline-none text-base bg-transparent font-medium" 
+            type="text" 
+            placeholder="¿A dónde vamos?" 
+            className="flex-1 outline-none text-base bg-transparent font-medium text-zinc-800 placeholder:text-zinc-400" 
             value={textoBusqueda} 
             onChange={(e) => setTextoBusqueda(capitalizar(e.target.value))}
+            onFocus={() => setMostrarListaSugerencias(true)} 
           />
-          <button type="submit" className="text-zinc-400">🔍</button>
+          
+          <button type="submit" className="text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer">
+            <Search className="w-5 h-5" />
+          </button>
         </form>
+
+        {/* LISTA FLOTANTE DE SUGERENCIAS */}
+        {mostrarListaSugerencias && sugerencias.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-zinc-100 z-[100] max-h-52 overflow-y-auto">
+            {sugerencias.map((sug, i) => (
+              <button
+                key={i}
+                type="button"
+                className="w-full text-left px-5 py-3 text-xs hover:bg-zinc-50 border-b border-zinc-50 last:border-0 truncate font-semibold text-zinc-700 flex items-center gap-3 transition-colors cursor-pointer"
+                onClick={() => seleccionarSugerenciaBusqueda(sug)} 
+              >
+                <MapPin className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                <span className="truncate">{sug.display_name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
         
         {/* BOTÓN PARA MOSTRAR LOS FILTROS */}
         <button 
           onClick={() => setMostrarFiltros(!mostrarFiltros)} 
-          className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all"
+          className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all w-full cursor-pointer"
         >
-          <span>Afinar la búsqueda</span>
-          <span className={`transition-transform duration-300 ${mostrarFiltros ? 'rotate-180' : ''}`}>⚙️</span>
+          <span className="text-sm tracking-tight">Afinar la búsqueda</span>
+          
+          <Settings2 
+            className={`w-4 h-4 text-zinc-600 transition-transform duration-300 cursor-pointer ${
+              mostrarFiltros ? 'rotate-180 text-[#e03b4b]' : 'rotate-0'
+            }`} 
+          />
         </button>
 
         {/* MODAL FILTROS */}
@@ -538,21 +700,42 @@ const fetchComentarios = async () => {
           <div 
             ref={panelRef} 
             className="bg-white rounded-[24px] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-top-2 duration-200 border border-zinc-100"
-            style={{ maxHeight: 'calc(100vh - 280px)' }}
+            style={{ maxHeight: 'calc(100vh - 420px)' }}
           >
-            {/*  SCROLL INTERNO */}
+            {/* SCROLL INTERNO */}
             <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar"> 
               <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3">
                 Tipos de lugar
               </h3>
               <div className="flex flex-col gap-1.5 pb-2">
                 {tiposLugar.map(f => (
-                  <label key={f.id} className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 transition-all ${filtrosActivos.includes(f.id) ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-100 bg-white'}`}>
-                    <input type="checkbox" className="hidden" checked={filtrosActivos.includes(f.id)} onChange={() => toggleFiltroVisual(f.id)} />
-                    <span className="text-lg">{f.icono}</span>
+                  <label 
+                    key={f.id} 
+                    className={`cursor-pointer flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] ${
+                      filtrosActivos.includes(f.id) 
+                        ? 'border-zinc-900 bg-zinc-50/80 shadow-sm' 
+                        : 'border-zinc-100 bg-white hover:border-zinc-200'
+                    }`}
+                  >
+                    <input 
+                      type="checkbox" 
+                      className="hidden" 
+                      checked={filtrosActivos.includes(f.id)} 
+                      onChange={() => toggleFiltroVisual(f.id)} 
+                    />
+                    
+                    <span className="text-xl flex-shrink-0 select-none">{f.icono}</span>
                     <span className="flex-1 font-bold text-zinc-700 text-xs tracking-tight">{f.nombre}</span>
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${filtrosActivos.includes(f.id) ? 'bg-zinc-900 border-zinc-900' : 'border-zinc-300'}`}>
-                      {filtrosActivos.includes(f.id) && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                    
+                    {/* Check redondo e interactivo */}
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                      filtrosActivos.includes(f.id) 
+                        ? 'bg-zinc-900 border-zinc-900 scale-110 shadow-sm' 
+                        : 'border-zinc-300 bg-white'
+                    }`}>
+                      {filtrosActivos.includes(f.id) && (
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-in zoom-in-50 duration-150"></div>
+                      )}
                     </div>
                   </label>
                 ))}
@@ -563,7 +746,7 @@ const fetchComentarios = async () => {
             <div className="p-4 bg-white border-t border-zinc-100 mt-auto shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
               <button 
                 onClick={() => ejecutarBusquedaSitios()}
-                className="w-full bg-[#e03b4b] hover:bg-red-600 text-white py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg transition-all active:scale-95"
+                className="w-full bg-[#e03b4b] hover:bg-red-600 text-white py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg transition-all active:scale-95 cursor-pointer"
               >
                 Aplicar filtros
               </button>
@@ -572,112 +755,195 @@ const fetchComentarios = async () => {
         )}
 
 
-        {/* PLANIFICAR VIAJE */}
-        <div className="flex flex-col gap-2">
-          <button 
-            onClick={() => {
-              setMostrarPanelRuta(!mostrarPanelRuta);
-              setMostrarFiltros(false); // Auto-cierre de filtros al abrir ruta
-            }} 
-            className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all"
-          >
-            <span>Planificar un viaje</span>
-            <MapIcon size={18} className="text-[#e03b4b]" />
-          </button>
+      {/* PLANIFICAR VIAJE */}
+      <div className="flex flex-col gap-2">
+        <button 
+          onClick={() => {
+            setMostrarPanelRuta(!mostrarPanelRuta);
+            setMostrarFiltros(false); // Auto-cierre de filtros al abrir ruta
+          }} 
+          className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all cursor-pointer"
+        >
+          <span>Planificar un viaje</span>
+          <MapIcon size={18} className="text-[#e03b4b]" />
+        </button>
 
-          {mostrarPanelRuta && (
-            <div className="bg-white p-6 rounded-[32px] shadow-2xl animate-in slide-in-from-top-2 duration-300 border border-zinc-100">
-              
-              {/* CAMPOS DE TEXTO */}
-              <div className="space-y-3">
+        {/* BUSCADOR INTELIGENTE */}
+        {mostrarPanelRuta && (
+          <div 
+            ref={panelRutaRef}
+            className="bg-white p-6 rounded-[32px] shadow-2xl animate-in slide-in-from-top-2 duration-300 border border-zinc-100 flex flex-col gap-4"
+          >
+            
+            <div className="space-y-3 relative">
+
+              {/* Texto informativo */}
+            <p className="text-xs text-zinc-600 font-semibold leading-relaxed px-2 text-justify w-full">
+              <span>
+                Por favor, seleccione un punto de partida y un punto de llegada para crear la ruta.
+              </span>
+            </p>
+
+              {/* INPUT SALIDA */}
+              <div className="relative flex items-center group">
+                <MapPin className="w-4 h-4 text-zinc-400 absolute left-3.5 z-10 pointer-events-none" />
                 <input 
                   placeholder="Salida..." 
-                  className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
+                  className="w-full bg-zinc-50 pl-10 pr-10 py-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 focus:bg-white transition-all" 
                   value={origen}
-                  onChange={(e) => setOrigen(capitalizar(e.target.value))}
+                  onChange={(e) => { 
+                    setOrigen(capitalizar(e.target.value)); 
+                    setRutaPintada(false); 
+                  }}
+                  onFocus={() => {
+                    setMostrarSugOrigen(true);
+                    setMostrarSugDestino(false);
+                    setMostrarListaSugerencias(false);
+                  }}
                 />
-                <input 
-                  placeholder="Llegada..." 
-                  className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
-                  value={destino}
-                  onChange={(e) => setDestino(capitalizar(e.target.value))}
-                />
+
+                {/* Botón de limpiar, de cierre */}
+                {origen && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Evita activar el input al borrar
+                      setOrigen("");
+                      setRutaPintada(false);
+                      setCoordenadasRuta([]);
+                      setInfoGuardado({ registrado: false, hora: "" });
+                    }}
+                    className="absolute right-3 z-20 p-1 bg-zinc-200 hover:bg-zinc-300 rounded-full md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150 cursor-pointer flex items-center justify-center text-zinc-900"
+                    style={{ minWidth: '22px', minHeight: '22px' }}
+                  >
+                    <X size={12} strokeWidth={4} className="text-zinc-900" />
+                  </button>
+                )}
+                
+                {/* Desplegable Salida */}
+                {mostrarSugOrigen && sugerenciasOrigen.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-zinc-100 z-[100] max-h-48 overflow-y-auto">
+                    {sugerenciasOrigen.map((sug, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="w-full text-left px-4 py-2.5 text-xs hover:bg-zinc-50 border-b border-zinc-50 last:border-0 truncate font-semibold text-zinc-700 flex items-center gap-3 transition-colors"
+                        onClick={() => {
+                          setOrigen(capitalizar(sug.display_name.split(',')[0]));
+                          setMostrarSugOrigen(false);
+                        }}
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+                        <span className="truncate">{sug.display_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* LÓGICA DE CONTROL DE SESIÓN Y CAMPOS */}
-              {!isAuthenticated ? (
-                /* CASO 1: NO HAY SESIÓN INICIADA -> OBLIGAR A REGISTRARSE/LOGUEARSE */
-                <div className="mt-5 p-4 bg-red-50/50 rounded-2xl border border-dashed border-red-200 text-center">
-                  <p className="text-[11px] text-zinc-600 mb-3 leading-snug font-medium">
-                    Para poder planificar y guardar tus rutas personalizadas necesitas tener una cuenta.
-                  </p>
-                  <button 
-                    onClick={() => navigate('/login')}
-                    className="w-full bg-white text-zinc-900 border border-zinc-200 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-zinc-50 transition-all shadow-sm"
-                  >
-                    Iniciar sesión o Registrarse
-                  </button>
-                </div>
-              ) : (
-                /* CASO 2: SÍ HAY SESIÓN INICIADA */
-                <div className="mt-4">
-                  {(!origen.trim() || !destino.trim()) ? (
-                    /* SI ESTÁ LOGUEADO PERO CAMPOS VACÍOS: LE AVISAMOS */
-                    <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center mb-3">
-                      <p className="text-[10px] text-zinc-500 font-medium">
-                        Introduce un punto de salida y llegada para activar la ruta.
-                      </p>
-                    </div>
-                  ) : null}
+              {/* INPUT LLEGADA */}
+              <div className="relative flex items-center group">
+                <MapPin className="w-4 h-4 text-[#e03b4b] absolute left-3.5 z-10 pointer-events-none" />
+                <input 
+                  placeholder="Llegada..." 
+                  className="w-full bg-zinc-50 pl-10 pr-10 py-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 focus:bg-white transition-all" 
+                  value={destino}
+                  onChange={(e) => { 
+                    setDestino(capitalizar(e.target.value)); 
+                    setRutaPintada(false); 
+                  }}
+                  onFocus={() => {
+                    setMostrarSugDestino(true);
+                    setMostrarSugOrigen(false);
+                    setMostrarListaSugerencias(false);
+                  }}
+                />
 
-                  <button 
-                    onClick={() => {
-                      // 1. Calcula y pinta la ruta en el mapa como siempre
-                      procesarYMostrarRuta();
-                      
-                      // 2. Calculamos la hora exacta actual
-                      const ahora = new Date();
-                      const horas = ahora.getHours().toString().padStart(2, '0');
-                      const minutos = ahora.getMinutes().toString().padStart(2, '0');
-                      const horaExacta = `${horas}:${minutos}`;
-
-                      // 3. Activamos el estado de registrado con la hora
-                      setInfoGuardado({ registrado: true, hora: horaExacta });
+                {/* Botón de limpiar, de cierre*/}
+                {destino && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Evita activar el input al borrar
+                      setDestino("");
+                      setRutaPintada(false);
+                      setCoordenadasRuta([]);
+                      setInfoGuardado({ registrado: false, hora: "" });
                     }}
-                    disabled={!origen.trim() || !destino.trim()}
-                    className={`w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg active:scale-95 ${
-                      (!origen.trim() || !destino.trim())
-                        ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none active:scale-100'
-                        : infoGuardado.registrado
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700' // Estilo si ya está registrado (Verde CaraMaps)
-                          : 'bg-[#e03b4b] hover:bg-red-600 text-white'       // Estilo normal inicial (Rojo)
-                    }`}
+                    className="absolute right-3 z-20 p-1 bg-zinc-200 hover:bg-zinc-300 rounded-full md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150 cursor-pointer flex items-center justify-center text-zinc-900"
+                    style={{ minWidth: '22px', minHeight: '22px' }}
                   >
-                    {infoGuardado.registrado 
-                      ? `✓ Registrado a las ${infoGuardado.hora}` 
-                      : 'Guardar ruta en mi perfil'
-                    }
+                    <X size={12} strokeWidth={4} className="text-zinc-900" />
                   </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        </div>
+                )}
 
+                {/* Desplegable Llegada */}
+                {mostrarSugDestino && sugerenciasDestino.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-zinc-100 z-[100] max-h-48 overflow-y-auto">
+                    {sugerenciasDestino.map((sug, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="w-full text-left px-4 py-2.5 text-xs hover:bg-zinc-50 border-b border-zinc-50 last:border-0 truncate font-semibold text-zinc-700 flex items-center gap-3 transition-colors"
+                        onClick={() => {
+                          setDestino(capitalizar(sug.display_name.split(',')[0]));
+                          setMostrarSugDestino(false);
+                        }}
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+                        <span className="truncate">{sug.display_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div> 
 
+            {/* Boton de ruta para iniciar sesion o registro */}
+            <button 
+              onClick={() => {
+                // CANDADO DE SESIÓN CON REDIRECCIÓN INSTANTÁNEA
+                if (!isAuthenticated) {
+                  navigate('/login'); 
+                  return; 
+                }
+
+                // Si tiene sesión, el flujo sigue su camino normal:
+                if (!rutaPintada) {
+                  procesarYMostrarRuta();
+                } else if (!infoGuardado.registrado) {
+                  const ahora = new Date();
+                  const horas = ahora.getHours().toString().padStart(2, '0');
+                  const minutos = ahora.getMinutes().toString().padStart(2, '0');
+                  setInfoGuardado({ registrado: true, hora: `${horas}:${minutos}` });
+                }
+              }}
+              disabled={!origen.trim() || !destino.trim()}
+              className={`w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 ${
+                !origen.trim() || !destino.trim()
+                  ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none active:scale-100' 
+                  : infoGuardado.registrado
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 cursor-pointer' 
+                    : 'bg-[#e03b4b] hover:bg-red-600 text-white shadow-red-600/20 cursor-pointer' 
+              }`}
+            >
+              {infoGuardado.registrado 
+                ? `Registrado a las ${infoGuardado.hora}` 
+                : !isAuthenticated
+                  ? 'Iniciar sesión' 
+                  : rutaPintada 
+                    ? 'Guardar ruta' 
+                    : 'Mostrar ruta'
+              }
+            </button>
+          </div>
+        )}
+      </div>
+      </div>
 
       {/* LISTA DE RESULTADOS (Solo aparece si hay puntos) */}
       {puntos.length > 0 && (
         <div className="relative flex-1 overflow-y-auto mt-4 border-t border-zinc-100 pt-4 max-h-[50vh] bg-zinc-50 rounded-b-3xl p-4">
-          
-          {/* Botón X para cerrar la lista */}
-          <button
-            onClick={() => setPuntos([])}
-            className="absolute top-2 right-2 z-10 bg-zinc-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow-lg hover:bg-zinc-700 transition-colors active:scale-90"
-          >
-            ✕
-          </button>
 
           <div className="flex flex-col gap-3">
             {puntos.map((p) => (
@@ -899,7 +1165,7 @@ const fetchComentarios = async () => {
       {/* Botón de Mi Ubicación */}
         <button 
           onClick={localizarUsuario}
-          className="w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 border-transparent bg-white/90 text-zinc-400 hover:text-[#e03b4b] hover:bg-white active:scale-90"
+          className="w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 border-transparent bg-white/90 text-zinc-400 hover:text-[#e03b4b] hover:bg-white active:scale-90 cursor-pointer"
         >
           <LocateFixed size={20} strokeWidth={2.5} />
           <span className="text-[7px] font-black uppercase mt-1">Mi posición</span>
@@ -909,7 +1175,7 @@ const fetchComentarios = async () => {
       <div className="flex flex-col gap-2">
         <button 
           onClick={() => setModoMapa('calle')}
-          className={`w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 ${
+          className={`w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 cursor-pointer ${
             modoMapa === 'calle' 
             ? 'border-zinc-900 bg-white text-zinc-900 scale-105' 
             : 'border-transparent bg-white/90 text-zinc-400 hover:text-zinc-600'
@@ -921,7 +1187,7 @@ const fetchComentarios = async () => {
 
         <button 
           onClick={() => setModoMapa('satelite')}
-          className={`w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 ${
+          className={`w-14 h-14 rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all border-2 cursor-pointer ${
             modoMapa === 'satelite' 
             ? 'border-zinc-900 bg-white text-zinc-900 scale-105' 
             : 'border-transparent bg-white/90 text-zinc-400 hover:text-zinc-600'
@@ -936,13 +1202,13 @@ const fetchComentarios = async () => {
       <div className="flex flex-col shadow-xl rounded-2xl overflow-hidden border border-zinc-100 bg-white/90">
         <button 
           onClick={() => mapRef.current?.zoomIn()}
-          className="w-14 h-12 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-white transition-colors border-b border-zinc-100 active:bg-zinc-50"
+          className="w-14 h-12 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-white transition-colors border-b border-zinc-100 active:bg-zinc-50 cursor-pointer  "
         >
           <Plus size={18} strokeWidth={3} />
         </button>
         <button 
           onClick={() => mapRef.current?.zoomOut()}
-          className="w-14 h-12 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-white transition-colors active:bg-zinc-50"
+          className="w-14 h-12 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-white transition-colors active:bg-zinc-50 cursor-pointer"
         >
           <Minus size={18} strokeWidth={3} />
         </button>
@@ -964,5 +1230,4 @@ const fetchComentarios = async () => {
   </div>
   );
 
-  
 };
