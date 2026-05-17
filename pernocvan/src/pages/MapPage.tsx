@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 // @ts-ignore
 import 'leaflet/dist/leaflet.css';
@@ -90,13 +90,19 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [sugerencias, setSugerencias] = useState<any[]>([]);
   const [mostrarListaSugerencias, setMostrarListaSugerencias] = useState(false);
 
-  // --- ESTADOS PARA EL PANEL DE RUTA ---
+  // ESTADOS PARA EL PANEL DE RUTA 
   const navigate = useNavigate();
   const [mostrarPanelRuta, setMostrarPanelRuta] = useState(false);
   const [origen, setOrigen] = useState("");
   const [destino, setDestino] = useState("");
 
+  // RUTAS Estado para almacenar los puntos de la línea de la ruta (Carretera) 
+  const [coordenadasRuta, setCoordenadasRuta] = useState<[number, number][]>([]);
+  // Guarda si la ruta está registrada y a qué hora (Ej: "14:32")
+  const [infoGuardado, setInfoGuardado] = useState<{ registrado: boolean; hora: string }>({ registrado: false, hora: "" });
 
+
+  // Sincronización de sesión (Rutas y Comentarios dependen de esto)
   useEffect(() => {
   const sincronizarSesion = async () => {
     // 1. Preguntamos a Supabase por la sesión en caché
@@ -105,7 +111,7 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     if (session) {
       // Solo actualizamos la propiedad que tu mapa lee: isAuthenticated
       useAuthStore.setState({ isAuthenticated: true });
-      console.log("🟢 Sesión recuperada de Supabase con éxito.");
+      
     }
 
     // 2. Escuchamos cambios de sesión en vivo (Login / Logout)
@@ -122,6 +128,71 @@ const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   sincronizarSesion();
 }, []);
+
+
+// Función para trazar la ruta por carretera usando OSRM
+const trazarRutaPorCarretera = async (latOrigen: number, lonOrigen: number, latDestino: number, lonDestino: number) => {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${lonOrigen},${latOrigen};${lonDestino},${latDestino}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.routes && data.routes.length > 0) {
+      // OSRM devuelve las coordenadas como [longitud, latitud], Leaflet las necesita al revés [latitud, longitud]
+      const puntosCarretera = data.routes[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
+      setCoordenadasRuta(puntosCarretera);
+
+      if (mapRef.current) {
+        mapRef.current.fitBounds(puntosCarretera, { padding: [50, 50] });
+      }
+    } else {
+      // Mensaje humanizado
+      mostrarNotificacion("⚠️ No hemos podido calcular el trayecto por carretera entre estos puntos.");
+    }
+  } catch (error) {
+    console.error(error);
+    mostrarNotificacion("❌ Ha ocurrido un error al conectar con el servidor de rutas.");
+  }
+};
+
+const procesarYMostrarRuta = async () => {
+  if (!origen.trim() || !destino.trim()) return;
+
+  try {
+    // 1. Buscamos las coordenadas de la ciudad de Salida en Nominatim
+    const resO = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origen)}&limit=1`);
+    const dataO = await resO.json();
+
+    // 2. Buscamos las coordenadas de la ciudad de Llegada en Nominatim
+    const resD = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destino)}&limit=1`);
+    const dataD = await resD.json();
+
+    if (dataO.length > 0 && dataD.length > 0) {
+      const latOri = parseFloat(dataO[0].lat);
+      const lonOri = parseFloat(dataO[0].lon);
+      const latDest = parseFloat(dataD[0].lat);
+      const lonDest = parseFloat(dataD[0].lon);
+
+      // 3. Enviamos las coordenadas numéricas a la función
+      await trazarRutaPorCarretera(latOri, lonOri, latDest, lonDest);
+      
+      // Toast
+      mostrarNotificacion?.(" Buen viaje. ¡Ruta calculada con éxito! ");
+      } else {
+        mostrarNotificacion?.("No hemos podido encontrar alguna de las localidades en el mapa.");
+      }
+    } catch (error) {
+      console.error(error);
+      mostrarNotificacion?.("No se ha podido cargar el itinerario. Inténtalo de nuevo.");
+    }
+  };
+
+
+  // Si el usuario cambia el origen o el destino, reiniciamos el botón para que pueda volver a guardar
+  useEffect(() => {
+    setInfoGuardado({ registrado: false, hora: "" });
+  }, [origen, destino]);
+
 
   
 
@@ -228,23 +299,23 @@ const fetchComentarios = async () => {
 };
 
 
-const handleEnviarComentario = async () => {
-    if (!nuevoComentario.trim()) return; // No enviar vacío
+// const handleEnviarComentario = async () => {
+//     if (!nuevoComentario.trim()) return; // No enviar vacío
 
-    const { error } = await supabase
-      .from('comentarios')
-      .insert([{ contenido: nuevoComentario }]);
+//     const { error } = await supabase
+//       .from('comentarios')
+//       .insert([{ contenido: nuevoComentario }]);
 
-    if (error) {
-      console.error("Error al publicar:", error);
-      mostrarNotificacion("❌ Error al publicar.");
-    } else {
-      mostrarNotificacion("✅ ¡Comentario publicado!");
-      setNuevoComentario(""); // Limpiar el input
-      setIsWritingComment(false); // Cerrar el formulario
-      fetchComentarios(); // Refrescar la lista automáticamente
-    }
-  };
+//     if (error) {
+//       console.error("Error al publicar:", error);
+//       mostrarNotificacion(" Error al publicar.");
+//     } else {
+//       mostrarNotificacion(" ¡Comentario publicado!");
+//       setNuevoComentario(""); // Limpiar el input
+//       setIsWritingComment(false); // Cerrar el formulario
+//       fetchComentarios(); // Refrescar la lista automáticamente
+//     }
+//   };
   
 
   // función que gestiona el clicK
@@ -266,7 +337,7 @@ const handleEnviarComentario = async () => {
     {/* Función para mostrar notificaciones temporales */}
     const mostrarNotificacion = (mensaje: string) => {
       setMensajeFlotante(mensaje);
-      setTimeout(() => setMensajeFlotante(""), 4500);
+      setTimeout(() => setMensajeFlotante(""), 3500);
     };
 
   {/* Función para buscar la ciudad usando Nominatim y volar el mapa */}
@@ -436,6 +507,7 @@ const handleEnviarComentario = async () => {
 
 
 
+
   return (
     <div className="relative h-screen w-full bg-zinc-100 overflow-hidden font-sans">
       
@@ -501,88 +573,98 @@ const handleEnviarComentario = async () => {
 
 
         {/* PLANIFICAR VIAJE */}
-<div className="flex flex-col gap-2">
-  <button 
-    onClick={() => {
-      setMostrarPanelRuta(!mostrarPanelRuta);
-      setMostrarFiltros(false); // Auto-cierre de filtros al abrir ruta
-    }} 
-    className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all"
-  >
-    <span>Planificar un viaje</span>
-    <MapIcon size={18} className="text-[#e03b4b]" />
-  </button>
-
-  {mostrarPanelRuta && (
-    <div className="bg-white p-6 rounded-[32px] shadow-2xl animate-in slide-in-from-top-2 duration-300 border border-zinc-100">
-      
-      {/* CAMPOS DE TEXTO */}
-      <div className="space-y-3">
-        <input 
-          placeholder="Salida..." 
-          className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
-          value={origen}
-          onChange={(e) => setOrigen(capitalizar(e.target.value))}
-        />
-        <input 
-          placeholder="Llegada..." 
-          className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
-          value={destino}
-          onChange={(e) => setDestino(capitalizar(e.target.value))}
-        />
-      </div>
-
-      {/* LÓGICA DE CONTROL DE SESIÓN Y CAMPOS */}
-      {!isAuthenticated ? (
-        /* CASO 1: NO HAY SESIÓN INICIADA -> OBLIGAR A REGISTRARSE/LOGUEARSE */
-        <div className="mt-5 p-4 bg-red-50/50 rounded-2xl border border-dashed border-red-200 text-center">
-          <p className="text-[11px] text-zinc-600 mb-3 leading-snug font-medium">
-            Para poder planificar y guardar tus rutas personalizadas necesitas tener una cuenta.
-          </p>
-          <button 
-            onClick={() => navigate('/login')}
-            className="w-full bg-white text-zinc-900 border border-zinc-200 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-zinc-50 transition-all shadow-sm"
-          >
-            Iniciar sesión o Registrarse
-          </button>
-        </div>
-      ) : (
-        /* CASO 2: SÍ HAY SESIÓN INICIADA */
-        <div className="mt-4">
-          {(!origen.trim() || !destino.trim()) ? (
-            /* SI ESTÁ LOGUEADO PERO CAMPOS VACÍOS: LE AVISAMOS */
-            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center mb-3">
-              <p className="text-[10px] text-zinc-500 font-medium">
-                Introduce un punto de salida y llegada para activar la ruta.
-              </p>
-            </div>
-          ) : null}
-
+        <div className="flex flex-col gap-2">
           <button 
             onClick={() => {
-              // Aquí llamaremos a la función que conecta con Supabase
-              console.log("Guardando ruta:", { origen, destino });
-              mostrarNotificacion?.("📍 ¡Guardando ruta en Supabase!");
-            }}
-            disabled={!origen.trim() || !destino.trim()}
-            className={`w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg active:scale-95 ${
-              (!origen.trim() || !destino.trim())
-                ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none active:scale-100'
-                : 'bg-[#e03b4b] hover:bg-red-600 text-white'
-            }`}
+              setMostrarPanelRuta(!mostrarPanelRuta);
+              setMostrarFiltros(false); // Auto-cierre de filtros al abrir ruta
+            }} 
+            className="bg-white rounded-full px-6 py-4 flex items-center justify-between shadow-lg text-zinc-800 font-bold hover:bg-zinc-50 transition-all"
           >
-            Guardar ruta en mi perfil
+            <span>Planificar un viaje</span>
+            <MapIcon size={18} className="text-[#e03b4b]" />
           </button>
+
+          {mostrarPanelRuta && (
+            <div className="bg-white p-6 rounded-[32px] shadow-2xl animate-in slide-in-from-top-2 duration-300 border border-zinc-100">
+              
+              {/* CAMPOS DE TEXTO */}
+              <div className="space-y-3">
+                <input 
+                  placeholder="Salida..." 
+                  className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
+                  value={origen}
+                  onChange={(e) => setOrigen(capitalizar(e.target.value))}
+                />
+                <input 
+                  placeholder="Llegada..." 
+                  className="w-full bg-zinc-50 p-3 rounded-xl border border-zinc-100 outline-none text-sm font-medium focus:border-zinc-300 transition-all" 
+                  value={destino}
+                  onChange={(e) => setDestino(capitalizar(e.target.value))}
+                />
+              </div>
+
+              {/* LÓGICA DE CONTROL DE SESIÓN Y CAMPOS */}
+              {!isAuthenticated ? (
+                /* CASO 1: NO HAY SESIÓN INICIADA -> OBLIGAR A REGISTRARSE/LOGUEARSE */
+                <div className="mt-5 p-4 bg-red-50/50 rounded-2xl border border-dashed border-red-200 text-center">
+                  <p className="text-[11px] text-zinc-600 mb-3 leading-snug font-medium">
+                    Para poder planificar y guardar tus rutas personalizadas necesitas tener una cuenta.
+                  </p>
+                  <button 
+                    onClick={() => navigate('/login')}
+                    className="w-full bg-white text-zinc-900 border border-zinc-200 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-zinc-50 transition-all shadow-sm"
+                  >
+                    Iniciar sesión o Registrarse
+                  </button>
+                </div>
+              ) : (
+                /* CASO 2: SÍ HAY SESIÓN INICIADA */
+                <div className="mt-4">
+                  {(!origen.trim() || !destino.trim()) ? (
+                    /* SI ESTÁ LOGUEADO PERO CAMPOS VACÍOS: LE AVISAMOS */
+                    <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center mb-3">
+                      <p className="text-[10px] text-zinc-500 font-medium">
+                        Introduce un punto de salida y llegada para activar la ruta.
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <button 
+                    onClick={() => {
+                      // 1. Calcula y pinta la ruta en el mapa como siempre
+                      procesarYMostrarRuta();
+                      
+                      // 2. Calculamos la hora exacta actual
+                      const ahora = new Date();
+                      const horas = ahora.getHours().toString().padStart(2, '0');
+                      const minutos = ahora.getMinutes().toString().padStart(2, '0');
+                      const horaExacta = `${horas}:${minutos}`;
+
+                      // 3. Activamos el estado de registrado con la hora
+                      setInfoGuardado({ registrado: true, hora: horaExacta });
+                    }}
+                    disabled={!origen.trim() || !destino.trim()}
+                    className={`w-full py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg active:scale-95 ${
+                      (!origen.trim() || !destino.trim())
+                        ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none active:scale-100'
+                        : infoGuardado.registrado
+                          ? 'bg-emerald-600 text-white hover:bg-emerald-700' // Estilo si ya está registrado (Verde CaraMaps)
+                          : 'bg-[#e03b4b] hover:bg-red-600 text-white'       // Estilo normal inicial (Rojo)
+                    }`}
+                  >
+                    {infoGuardado.registrado 
+                      ? `✓ Registrado a las ${infoGuardado.hora}` 
+                      : 'Guardar ruta en mi perfil'
+                    }
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  )}
-</div>
-</div>
+        </div>
 
-
-
-        
 
 
       {/* LISTA DE RESULTADOS (Solo aparece si hay puntos) */}
@@ -648,6 +730,19 @@ const handleEnviarComentario = async () => {
               : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             } 
           />
+
+          {/* Rutas */}
+          {coordenadasRuta.length > 0 && (
+            <Polyline 
+              positions={coordenadasRuta} 
+              pathOptions={{ 
+                color: '#e03b4b', // Rojo 
+                weight: 5,        // Grosor de la línea
+                opacity: 0.85,    // Opacidad para ver las calles por debajo
+                lineJoin: 'round' // Curvas suavizadas
+              }} 
+            />
+          )}
 
           {puntos.map(p => {
             const config = tiposLugar.find(t => t.id === p.tipo) || tiposLugar[0];
@@ -858,7 +953,7 @@ const handleEnviarComentario = async () => {
       {/* TOAST DE NOTIFICACIÓN */}
       {mensajeFlotante && (
         <div className="fixed top-6 right-6 z-[9999] animate-in slide-in-from-top-4 duration-300">
-          <div className="bg-zinc-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-zinc-700">
+          <div className="bg-white text-zinc-900 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-zinc-100">
               
             <p className="font-bold text-sm">{mensajeFlotante}</p>
             <button onClick={() => setMensajeFlotante("")} className="ml-2 text-zinc-400 hover:text-white">✕</button>
