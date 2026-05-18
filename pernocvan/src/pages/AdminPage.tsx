@@ -1,9 +1,6 @@
 import { supabase } from "@/database/supabase/client";
 import { RefreshCw, Search, Trash2, Save, X, MapPin, Truck, Info } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Area, AreaChart, CartesianGrid,  XAxis } from "recharts";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-
 
 import { toast } from "sonner";
 
@@ -25,38 +22,7 @@ export const AdminPage = () => {
 
   useEffect(() => { cargarUsuarios(); }, []);
 
-  // Agrupar y contar modelos de furgonetas
-  const datosFurgonetas = Object.entries(
-    usuarios.reduce((acc: Record<string, number>, u) => {
-      const van = u.van_model?.trim() || "No especificado";
-      acc[van] = (acc[van] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .map(([modelo, cantidad]) => ({ modelo, viajeros: cantidad }))
-    .sort((a, b) => b.viajeros - a.viajeros)
-    .slice(0, 5);
-
-  //  Agrupar y contar ubicaciones 
-  const datosUbicaciones = Object.entries(
-    usuarios.reduce((acc: Record<string, number>, u) => {
-      const ciudad = u.address?.trim() || "No especificada";
-      acc[ciudad] = (acc[ciudad] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .map(([ciudad, cantidad]) => ({ ciudad, viajeros: cantidad }))
-    .sort((a, b) => b.viajeros - a.viajeros)
-    .slice(0, 5);
-
-  // Configuración de colores de las gráficas de Shadcn
-  const chartConfig = {
-    viajeros: {
-      label: "Viajeros",
-      color: "hsl(var(--primary))",
-    },
-  } satisfies ChartConfig;
-
+  
   // Función para crear o actualizar un usuario
   const gestionarGuardado = async () => {
     if (!usuarioSeleccionado?.username) {
@@ -109,13 +75,16 @@ export const AdminPage = () => {
   return (
     <div className="bg-background pt-10 pb-40 px-4 min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700">
-        
-        {/* HEADER */}
-        <div className="flex justify-between items-end border-b pb-6">
+      
+      {/* CABECERA */}
+      <div className="flex items-center justify-between space-y-2">
           <div>
-            <h3 className="text-4xl font-black tracking-tighter">Control de la Comunidad</h3>
-            <p className="text-muted-foreground text-sm">Gestiona los perfiles viajeros y sus furgonetas</p>
+            <h2 className="text-3xl font-black tracking-tight text-foreground">Control de la Comunidad</h2>
+            <p className="text-sm text-muted-foreground">
+              Gestiona los perfiles viajeros y sus furgonetas
+            </p>
           </div>
+      
           <button onClick={cargarUsuarios} className="p-3 bg-secondary rounded-xl hover:rotate-180 transition-all duration-500">
             <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -159,91 +128,6 @@ export const AdminPage = () => {
           ))}
         </div>
 
-        {/* SECCIÓN GRÁFICAS */}
-        {usuarios.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500 mt-30">
-            
-            {/* Gráfica 1 Tipos de Furgonetas */}
-            <div className="bg-card border-2 border-muted p-6 rounded-3xl space-y-4 shadow-sm flex flex-col justify-between">
-              <div>
-                <h4 className="font-black text-lg tracking-tight">Ranking de Vehículos</h4>
-                <p className="text-xs text-muted-foreground">Los modelos más populares de la comunidad</p>
-              </div>
-              
-              {/* Contenedor de usuarios*/}
-              <div className="flex-1 flex flex-col justify-center space-y-3 min-h-[240px] pt-2">
-                {datosFurgonetas.map((item: any, index: number) => {
-                  // Calculamos el porcentaje real en base al total de usuarios
-                  const porcentaje = usuarios.length > 0 ? (item.viajeros / usuarios.length) * 100 : 0;
-                  
-                  return (
-                    <div key={item.modelo} className="space-y-1">
-                      <div className="flex justify-between items-center text-xs font-bold">
-                        <div className="flex items-center gap-2">
-                          {/* Un pequeño indicador numérico tipo medalla (1, 2, 3...) */}
-                          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-secondary text-[10px] font-black text-muted-foreground">
-                            {index + 1}
-                          </span>
-                          <span className="truncate max-w-[160px] text-foreground font-semibold">
-                            {item.modelo}
-                          </span>
-                        </div>
-                        <span className="text-muted-foreground font-mono">
-                          {item.viajeros} {item.viajeros === 1 ? 'furgo' : 'furgos'}
-                        </span>
-                      </div>
-                      
-                      {/* Barra de progreso */}
-                      <div className="w-full bg-secondary/40 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-primary h-full rounded-full transition-all duration-1000" 
-                          style={{ width: `${porcentaje}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Gráfica 2 Regiones */}
-            <div className="bg-card border-2 border-muted p-6 rounded-3xl space-y-4 shadow-sm">
-              <div>
-                <h4 className="font-black text-lg tracking-tight">Lugares de Origen</h4>
-                <p className="text-xs text-muted-foreground">Ciudades y regiones con más viajeros activos</p>
-              </div>
-
-              <ChartContainer config={chartConfig} className="h-[240px] w-full">
-                <AreaChart data={datosUbicaciones} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorViajerosRegion" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="rgb(22, 163, 74)" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="rgb(22, 163, 74)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted/30" />
-                  <XAxis 
-                    dataKey="ciudad" 
-                    tickLine={false} 
-                    axisLine={false} 
-                    tickMargin={8}
-                    className="text-[10px] font-bold fill-muted-foreground"
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="viajeros" 
-                    stroke="rgb(22, 163, 74)" 
-                    strokeWidth={2}
-                    fillOpacity={1} 
-                    fill="url(#colorViajerosRegion)" 
-                  />
-                </AreaChart>
-              </ChartContainer>
-            </div>
-
-          </div>
-        )}
 
         {/* Menu lateral (CREATE/READ/UPDATE/DELETE) */}  
         {usuarioSeleccionado && (

@@ -117,14 +117,13 @@ export const DashboardPage = () => {
     return (
       <div className="h-96 flex items-center justify-center gap-3 bg-background">
         <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cargando métricas reales...</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cargando datos...</p>
       </div>
     );
   }
 
 
   return (
-
     <div className="bg-background pt-10 pb-40 px-4 min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700">
     
