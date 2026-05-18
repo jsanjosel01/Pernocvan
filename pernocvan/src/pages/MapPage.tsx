@@ -48,10 +48,10 @@ const tiposLugar = [
   // { id: 'servicio_electricidad', icono: '⚡', nombre: 'Electricidad', color: 'bg-yellow-500', seccion: 'servicio', query: 'node["power"="outlet"];' },
   { id: 'servicio_wc', icono: '🚻', nombre: 'Baños / WC', color: 'bg-stone-500', seccion: 'servicio', query: 'node["amenity"="toilets"]; way["amenity"="toilets"];' },
   { id: 'servicio_wifi', icono: '📶', nombre: 'Wifi', color: 'bg-indigo-500', seccion: 'servicio', query: 'node["internet_access"="wlan"];' },
-  { id: 'servicio_lavanderia', icono: '🧺', nombre: 'Lavandería', color: 'bg-pink-500', seccion: 'servicio', query: 'node["amenity"="launderette"]; way["amenity"="launderette"];' },
+  // { id: 'servicio_lavanderia', icono: '🧺', nombre: 'Lavandería', color: 'bg-pink-500', seccion: 'servicio', query: 'node["amenity"="launderette"]; way["amenity"="launderette"]; node["washing_machine"="yes"]; way["washing_machine"="yes"];' },
   { id: 'servicio_picnic', icono: '🪵', nombre: 'Zona de Pícnic', color: 'bg-orange-700', seccion: 'servicio', query: 'node["leisure"="picnic_table"]; way["leisure"="picnic_table"]; node["tourism"="picnic_site"]; way["tourism"="picnic_site"];' },
-  { id: 'servicio_basura', icono: '🗑️', nombre: 'Contenedores', color: 'bg-teal-600', seccion: 'servicio', query: 'node["amenity"="waste_disposal"]; node["amenity"="waste_basket"];' },
-  { id: 'servicio_vaciado', icono: '🚰', nombre: 'Vaciado de Aguas', color: 'bg-lime-600', seccion: 'servicio', query: 'node["amenity"="sanitary_dump_station"]; way["amenity"="sanitary_dump_station"];' },
+  { id: 'servicio_basura', icono: '🗑️', nombre: 'Basuras', color: 'bg-teal-600', seccion: 'servicio', query: 'node["amenity"="waste_disposal"]; node["amenity"="waste_basket"];' },
+  // { id: 'servicio_vaciado', icono: '🚰', nombre: 'Vaciado de Aguas', color: 'bg-lime-600', seccion: 'servicio', query: 'node["amenity"="sanitary_dump_station"]; way["amenity"="sanitary_dump_station"];' },
   { id: 'servicio_mascotas', icono: '🐾', nombre: 'Admite Mascotas', color: 'bg-amber-700', seccion: 'servicio', query: 'node["dog"="yes"]; way["dog"="yes"];' },
   { id: 'servicio_salud', icono: '🏥', nombre: 'Farmacias y Salud', color: 'bg-rose-600', seccion: 'servicio', query: 'node["amenity"="pharmacy"]; node["amenity"="hospital"];' },
   { id: 'servicio_carga', icono: '🔌', nombre: 'Puntos de Carga EV', color: 'bg-cyan-600', seccion: 'servicio', query: 'node["amenity"="charging_station"]; way["amenity"="charging_station"];' }
@@ -478,11 +478,12 @@ const fetchComentarios = async () => {
         } 
         else if (tags.leisure === 'picnic_table' || tags.tourism === 'picnic_site') tipoAsignado = 'servicio_picnic';
         else if (tags.amenity === 'waste_disposal' || tags.amenity === 'waste_basket') tipoAsignado = 'servicio_basura';
-        else if (tags.amenity === 'sanitary_dump_station') tipoAsignado = 'servicio_vaciado';
+        // else if (tags.amenity === 'sanitary_dump_station') tipoAsignado = 'servicio_vaciado';
         else if (tags.dog === 'yes') tipoAsignado = 'servicio_mascotas';
 
         else if (tags.amenity === 'pharmacy' || tags.amenity === 'hospital') tipoAsignado = 'servicio_salud';
         else if (tags.amenity === 'charging_station') tipoAsignado = 'servicio_carga';
+        // else if (tags.amenity === 'launderette') { tipoAsignado = 'servicio_lavanderia';}
 
         else {
           tipoAsignado = 'spot'; // Por defecto
@@ -746,7 +747,6 @@ useEffect(() => {
                   </label>
                 ))}
               </div>
-
               
               {/* SERVICIOS E INSTALACIONES */}
               {verMasFiltros && (
@@ -790,8 +790,7 @@ useEffect(() => {
 
             </div>
 
-            {/* 🔽 BOTÓN EXPANDIBLE DE SERVICIOS (Totalmente libre, sin candados) */}
-            {/* ↕️ CONTENEDOR EN LÍNEA: MÁS FILTROS (+) Y RESTABLECER (-) */}
+            {/* BOTÓN EXPANDIBLE DE SERVICIOS */}
             <div className="flex gap-3 w-[92%] mx-auto my-4">
               
               {/* BOTÓN EXPANDIBLE (+ / -) */}
@@ -853,7 +852,6 @@ useEffect(() => {
           >
             
             <div className="space-y-3 relative">
-
               {/* Texto informativo */}
             <p className="text-xs text-zinc-600 font-semibold leading-relaxed px-2 text-justify w-full">
               <span>
@@ -1055,6 +1053,7 @@ useEffect(() => {
         </div>
       )}
 
+
       {/* MAPA CON PINTADO DINÁMICO */}
       <div className="absolute inset-0 z-0">
 
@@ -1079,14 +1078,15 @@ useEffect(() => {
             <Polyline 
               positions={coordenadasRuta} 
               pathOptions={{ 
-                color: '#e03b4b', // Rojo 
-                weight: 5,        // Grosor de la línea
-                opacity: 0.85,    // Opacidad para ver las calles por debajo
-                lineJoin: 'round' // Curvas suavizadas
+                color: '#e03b4b',
+                weight: 5,
+                opacity: 0.85,   
+                lineJoin: 'round'
               }} 
             />
           )}
 
+          {/* Marcadores dinámicos según la búsqueda y filtros */}
           {puntos.map(p => {
             const config = tiposLugar.find(t => t.id === p.tipo) || tiposLugar[0];
             return (
@@ -1112,14 +1112,12 @@ useEffect(() => {
     {selectedPoint && (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         
-        <div 
-          className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm" 
-          onClick={() => setSelectedPoint(null)} 
+        <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm" onClick={() => setSelectedPoint(null)} 
         />
 
         {/* Contenedor */}
         <div 
-          className="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row border border-zinc-100"
+          className="relative bg-white w-full max-w-xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row border border-zinc-100"
           onClick={(e) => e.stopPropagation()}
         >
           
@@ -1156,12 +1154,6 @@ useEffect(() => {
                   </button>
                 </div>
 
-                {/* Estrellas ficticias para que la ficha no se vea "vacía" */}
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="flex text-[#e03b4b] text-sm">★★★★★</div>
-                  <span className="text-[10px] font-bold text-zinc-400">4.5</span>
-                </div>
-
                 <div className="space-y-6">
                   {/* Ubicación Estilizada */}
                       {selectedPoint.direccion && 
@@ -1173,23 +1165,7 @@ useEffect(() => {
                   </div>
                   }
 
-                  {/* Enlaces dinámicos: Solo aparecen si hay información */}
-                  {(selectedPoint.web || selectedPoint.telefono) && (
-                    <div className="flex gap-4 pt-2">
-                      {selectedPoint.web && (
-                        <a href={selectedPoint.web} target="_blank" rel="noreferrer" className="flex-1 bg-zinc-900 text-white py-3 rounded-xl font-bold text-[10px] uppercase text-center tracking-widest hover:bg-zinc-800 transition-all">
-                          Sitio Web
-                        </a>
-                      )}
-                      {selectedPoint.telefono && (
-                        <a href={`tel:${selectedPoint.telefono}`} className="flex-1 bg-zinc-100 text-zinc-900 py-3 rounded-xl font-bold text-[10px] uppercase text-center tracking-widest hover:bg-zinc-200 transition-all">
-                          Llamar
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Coordenadas Técnicas al pie */}
+                  {/* Coordenadas */}
                   <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100">
                     <div className="flex justify-between items-center">
                       <div className="flex flex-col">
@@ -1209,16 +1185,16 @@ useEffect(() => {
 
           </div>
 
-          {/* 2. PARTE DERECHA: IMAGEN / ICONO GIGANTE */}
+          {/* 2. PARTE DERECHA: IMAGEN / ICONO */}
           <div className="w-full md:w-64 bg-zinc-50 flex items-center justify-center relative overflow-hidden border-l border-zinc-100 shrink-0">
-            {/* Imagen de fondo opcional (Unsplash dinámico) */}
+            
             <img 
               src={`https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?auto=format&fit=crop&q=60&w=400`} 
               className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale"
               alt="background"
             />
             
-            {/* Icono central grande */}
+            {/* Icono */}
             <div className="relative z-10 text-7xl filter drop-shadow-2xl">
               {tiposLugar.find(t => t.id === selectedPoint.tipo)?.icono || "📍"}
             </div>
