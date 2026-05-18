@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { supabase } from '../../database/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 
-import { Map, Globe, Sun, Moon, Truck, LayoutDashboard, Info} from 'lucide-react';
+import { Map, Globe, Sun, Moon, Truck, LayoutDashboard, Info, Users} from 'lucide-react';
 
 export const Header = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -90,18 +90,37 @@ export const Header = () => {
               <Moon className="h-4 w-4 hidden dark:block" />
             </Button>
 
-            {/* BOTÓN DEL DASHBOARD  */}
+
+          {/* LÍNEA DIVISORIA FIJA */}
+          <div className="h-5 w-[1px] bg-border mx-2 self-center opacity-80" />
+
+
+          {/* BOTÓN DEL DASHBOARD  */}
           {isAdmin && (
             <Button 
               variant="ghost" 
               asChild 
               className="cursor-pointer gap-2 text-[#e03b4b] hover:text-red-700 font-bold transition-colors h-9 px-3 bg-red-500/5 hover:bg-red-500/10 rounded-full animate-in fade-in duration-200"
-              title="Ir al Dashboard Analítico"
+              title="Ir al Dashboard"
             >
-              {/* va al la pagina dashboard */}
               <Link to="/admin/dashboard" className="flex items-center gap-2">
                 <LayoutDashboard className="h-4 w-4" />
                 {/* <span className="text-sm font-bold">Dashboard</span> */}
+              </Link>
+            </Button>
+          )}
+
+          {/* BOTÓN GESTIÓN DE USUARIOS */}
+          {isAdmin && (
+            <Button 
+              variant="ghost" 
+              asChild 
+              className="cursor-pointer gap-2 text-[#e03b4b] hover:text-red-700 font-bold transition-colors h-9 px-3 bg-red-500/5 hover:bg-red-500/10 rounded-full animate-in fade-in duration-200"
+              title="Gestión de la Comunidad"
+            >
+              <Link to="/admin" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                {/* <span className="text-xs font-black uppercase tracking-wider">Comunidad</span> */}
               </Link>
             </Button>
           )}
