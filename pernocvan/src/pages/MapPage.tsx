@@ -709,6 +709,31 @@ const toggleFavorito = async (sitio: any) => {
   }
 };
 
+// Guardar las rutas en supabase
+const persistirRutaEnSupabase = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Sesión no válida");
+
+    // guardar datos en supabase
+    const { error } = await supabase
+      .from("rutas_guardadas")
+      .insert([
+        {
+          user_id: user.id,
+          origen: origen.trim(),
+          destino: destino.trim(),
+          distancia: null 
+        }
+      ]);
+
+    if (error) throw error;
+    console.log("Ruta guardada: " + origen + " -> " + destino);
+
+  } catch (error: any) {
+    console.error("Error al guardar", error);
+  }
+};
 
 // Quitar el SCROLL DE LA WEB 
   useEffect(() => {
@@ -1069,7 +1094,7 @@ const toggleFavorito = async (sitio: any) => {
 
             {/* Boton de ruta para iniciar sesion o registro */}
             <button 
-              onClick={() => {
+              onClick={async () => {
                 // CANDADO DE SESIÓN CON REDIRECCIÓN INSTANTÁNEA
                 if (!isAuthenticated) {
                   navigate('/login'); 
@@ -1080,6 +1105,10 @@ const toggleFavorito = async (sitio: any) => {
                 if (!rutaPintada) {
                   procesarYMostrarRuta();
                 } else if (!infoGuardado.registrado) {
+                  
+                  // Inserta la fila en Supabase antes de cambiar los estados visuales
+                  await persistirRutaEnSupabase();
+
                   const ahora = new Date();
                   const horas = ahora.getHours().toString().padStart(2, '0');
                   const minutos = ahora.getMinutes().toString().padStart(2, '0');
