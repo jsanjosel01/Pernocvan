@@ -37,10 +37,15 @@ export default function ResetPassword() {
       if (error) throw error;
 
       toast.success("¡Contraseña actualizada correctamente!");
-      setTimeout(() => navigate("/login"), 2000);
+      
+      // Al terminar con éxito, limpiamos y redirigimos
+      setTimeout(async () => {
+        await supabase.auth.signOut();
+        navigate("/login");
+      }, 2000);
+
     } catch (err: any) {
       toast.error(err.message || "Error inesperado.");
-    } finally {
       setLoading(false);
     }
   };
@@ -60,7 +65,7 @@ export default function ResetPassword() {
             <label className="text-sm font-medium">Nueva contraseña <span className="text-red-500">*</span></label>
             <div className="relative">
             <Input 
-                className="h-12 text-lg pr-16" // Añadimos espacio a la derecha (pr-16) para los dos iconos
+                className="h-12 text-lg pr-16"
                 type={showPassword ? "text" : "password"} 
                 placeholder="••••••••"
                 value={formData.password} 
@@ -71,7 +76,7 @@ export default function ResetPassword() {
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)} 
                 /* Cambiamos right-3 por right-10 para dejar espacio a Passbolt en el borde */
-                className="absolute right-10 top-3 text-slate-500 hover:text-slate-700 transition-colors"
+                className="absolute right-10 top-3 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
             >
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
             </button>
@@ -84,7 +89,7 @@ export default function ResetPassword() {
 
           <Button 
             disabled={loading || !isFormValid}
-            className={`h-12 w-full text-lg font-semibold transition-all duration-300 rounded-xl ${isFormValid ? "bg-primary text-white" : "bg-zinc-200 text-zinc-400"}`}
+            className={`h-12 w-full text-lg font-semibold transition-all duration-300 rounded-xl ${isFormValid ? "bg-primary text-white" : "bg-zinc-200 text-zinc-400 cursor-pointer"}`}
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Guardar nueva contraseña"}
           </Button>
