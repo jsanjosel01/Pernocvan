@@ -135,14 +135,15 @@ export const Hero = () => {
         {/* BOTÓN DE VER TODO */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
           <p className="text-zinc-400 text-sm font-medium">¿Prefieres ver todo?</p>
-          <Link 
-            to="/mapa"
-            className="group flex items-center gap-2 bg-white/10 hover:bg-white text-white hover:text-zinc-950 border border-white/20 px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 backdrop-blur-sm"
+          <button 
+            onClick={() => navigate('/mapa')} 
+            className="group flex items-center gap-2 bg-white/10 hover:bg-white text-white hover:text-zinc-950 border border-white/20 px-6 py-3 rounded-full font-bold text-sm transition-all duration-300 backdrop-blur-sm cursor-pointer"
           >
             <Compass className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />
             Ver todos los puntos
-          </Link>
+          </button>
         </div>
+
       </div>
     </section>
   );

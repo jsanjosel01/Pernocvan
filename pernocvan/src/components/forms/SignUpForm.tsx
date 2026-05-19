@@ -203,37 +203,37 @@ export default function SignUpForm() {
             </div>
 
             {/* CHECKBOXES */}
-<div className="space-y-3 pt-2">
-    <div className="flex items-center space-x-2">
-        <div className="flex items-center">
-            <input 
-                type="checkbox" 
-                id="terms" 
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" 
-                checked={acceptedTerms} 
-                onChange={(e) => setAcceptedTerms(e.target.checked)} 
-            /> 
-        </div>
-        <label htmlFor="terms" className="text-sm text-muted-foreground">
-            Acepto los <Link to="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary font-medium text-foreground">Términos y Condiciones de uso</Link>.
-        </label>
-    </div>
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="terms" 
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" 
+                    checked={acceptedTerms} 
+                    onChange={(e) => setAcceptedTerms(e.target.checked)} 
+                  /> 
+                </div>
+                <label htmlFor="terms" className="text-sm text-muted-foreground">
+                  Acepto los <Link to="/terms" className="underline hover:text-primary font-medium text-foreground">Términos y Condiciones de uso</Link>.
+                </label>
+              </div>
 
-    <div className="flex items-center space-x-2">
-        <div className="flex items-center">
-            <input 
-                type="checkbox" 
-                id="privacy" 
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" 
-                checked={acceptedPrivacy} 
-                onChange={(e) => setAcceptedPrivacy(e.target.checked)} 
-            />
-        </div>
-        <label htmlFor="privacy" className="text-sm text-muted-foreground">
-            Acepto la <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary font-medium text-foreground">Política de privacidad y tratamiento de datos</Link>.
-        </label>
-    </div>
-</div>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="privacy" 
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" 
+                    checked={acceptedPrivacy} 
+                    onChange={(e) => setAcceptedPrivacy(e.target.checked)} 
+                  />
+                </div>
+                <label htmlFor="privacy" className="text-sm text-muted-foreground">
+                  Acepto la <Link to="/privacy" className="underline hover:text-primary font-medium text-foreground">Política de privacidad y tratamiento de datos</Link>.
+                </label>
+              </div>
+            </div>
 
             
             <Button 
