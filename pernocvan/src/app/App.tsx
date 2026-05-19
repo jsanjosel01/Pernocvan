@@ -11,12 +11,15 @@ import { AdminPage } from '@/pages/AdminPage';
 import { TermsPage } from '@/pages/TermsPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import ScrollToTop from '@/components/common/ScrollToTop';
 
 
 function App() {
   return (
     <AppLayout>
       <Toaster richColors position="top-right" />
+
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/mapa" element={<MapPage />} />
