@@ -1,12 +1,11 @@
 # 🚐 **VANLIFE**
 ### Autonomía total en ruta: Localizador de servicios para tu estilo de vida camper
 
+---
 
 ## 🌍 **Descripción General**
 **VANLIFE** es una aplicación web desarrollada para el ciclo de **Desarrollo de Aplicaciones Web (DAW)**. 
 Es una herramienta de asistencia diseñada para dotar de autonomía a la comunidad camper, permitiendo la localización y gestión inteligente de servicios esenciales para el viajero.
-
----
 
 ### 🎯 **Objetivo del Proyecto**
 Su objetivo es simplifica la vida sobre ruedas proporcionando un mapa interactivo con puntos de interés clave: zonas de pernocta seguras, estaciones de servicio, gasolineras, puntos de recarga de agua y parkings habilitados. Permite a los usuarios planificar rutas optimizadas, descubrir tus lugares favoritos y compartir información relevante con la comunidad."
@@ -58,6 +57,7 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 * 🛡️ **Admin**	Gestión: Gestión de usuarios, moderar e eliminar contenido inapropiado.
 
 ---
+
 ### 🗄️ **Estructura de Base de Datos (Supabase)**
 
 | Tabla | Descripción |
@@ -105,17 +105,17 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 
 #### **ABRIL: INICIO Y CONCEPTO**
 * **08-ABRIL** | 🏁 Presentación del proyecto y definición de objetivos (VanLife).
-* **29-ABRIL** | 🏗️ Arquitectura: Diseño de base de datos en Supabase y configuración del entorno de desarrollo (Vite + Tailwind + Shadcn)
-*              
+* **29-ABRIL** | 🏗️ Arquitectura: Diseño de base de datos en Supabase y configuración del entorno de desarrollo (Vite + Tailwind + Shadcn)            
 
 #### **MAYO: DISEÑO Y ESTRUCTURA**
 * **13-MAYO** | 🔐 Core del sistema: Implementación de Autenticación (Login/Registro/JWT), integración de Mapas (Leaflet) y lógica de filtrado de servicios.
 * **27-MAYO** | 🚀 Finalización: Pruebas de integración, despliegue en producción (Vercel) y revisión de documentación.
 
-#### **JUNIO: FINALIZACIÓN Y PRESENTACIÓN
-* **01-JUNIO** | ✅ Presentación final del TFG ante el tribunal. 
----
+#### **JUNIO: FINALIZACIÓN Y PRESENTACIÓN**
+* **01-JUNIO** | ✅ Presentación final del TFG ante el tribunal.
 
+  
+---
 
 ## 👤 **Autoría del proyecto**
 
