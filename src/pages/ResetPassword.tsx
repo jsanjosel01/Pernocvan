@@ -60,7 +60,7 @@ export default function ResetPassword() {
         </div>
 
         <div className="space-y-6">
-          {/* Nueva Contraseña */}
+          {/* Nueva contraseña */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Nueva contraseña <span className="text-red-500">*</span></label>
             <div className="relative">
@@ -72,12 +72,7 @@ export default function ResetPassword() {
                 onChange={(e) => setFormData({...formData, password: e.target.value})} 
                 
             />
-            <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)} 
-                /* Cambiamos right-3 por right-10 para dejar espacio a Passbolt en el borde */
-                className="absolute right-10 top-3 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
-            >
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-10 top-3 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer">
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
             </button>
 
@@ -87,10 +82,7 @@ export default function ResetPassword() {
             </div>
           </div>
 
-          <Button 
-            disabled={loading || !isFormValid}
-            className={`h-12 w-full text-lg font-semibold transition-all duration-300 rounded-xl ${isFormValid ? "bg-primary text-white" : "bg-zinc-200 text-zinc-400 cursor-pointer"}`}
-          >
+          <Button disabled={loading || !isFormValid} className={`h-12 w-full text-lg font-semibold transition-all duration-300 rounded-xl ${isFormValid ? "bg-primary text-white" : "bg-zinc-200 text-zinc-400 cursor-pointer"}`}>
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Guardar nueva contraseña"}
           </Button>
         </div>

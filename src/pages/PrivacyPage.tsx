@@ -4,18 +4,18 @@ export const PrivacyPage = () => {
     
     <div className="flex justify-center bg-background pt-10 pb-40 px-4">
       <div className="max-w-3xl mx-auto bg-card p-8 md:p-12 rounded-[32px] border border-border shadow-sm">
-        <h2 className="text-4xl font-black text-primary mb-8 tracking-tight">Política de Privacidad</h2>
+        <h2 className="text-4xl font-black text-primary mb-8 tracking-tight">Política de privacidad</h2>
         
         <div className="space-y-8 text-foreground/80 leading-relaxed">
           <section className="space-y-3">
-            <h3 className="text-xl font-bold text-foreground">1. Datos Recogidos</h3>
+            <h3 className="text-xl font-bold text-foreground">1. Datos recogidos</h3>
             <p className="text-sm">
               Solo recogemos los datos necesarios para tu cuenta: nombre de usuario, correo electrónico y la información que decidas compartir en tus reseñas.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h3 className="text-xl font-bold text-foreground">2. Uso de la Ubicación</h3>
+            <h3 className="text-xl font-bold text-foreground">2. Uso de la ubicación</h3>
             <p className="text-sm">
               Utilizamos tu ubicación en tiempo real para mostrarte los puntos de pernocta más cercanos a ti. Estos datos no se almacenan en nuestros servidores de forma permanente.
             </p>

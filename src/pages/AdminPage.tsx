@@ -107,34 +107,42 @@ export const AdminPage = () => {
             </p>
           </div>
       
-          <button onClick={cargarUsuarios} className="p-3 bg-secondary rounded-xl hover:rotate-180 transition-all duration-500 cursor-pointer">
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
+          <button onClick={cargarUsuarios} className="p-3 bg-secondary text-foreground rounded-xl hover:rotate-180 transition-all duration-500 cursor-pointer">
+          <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+        </button>
         </div>
 
         {/* TARJETAS DE CONTADORES */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
           <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-            <div className="p-3 bg-primary/10 rounded-xl text-primary"><Users className="h-5 w-5" /></div>
+            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+              <Users className="h-5 w-5" />
+            </div>
             <div>
-              <p className="text-2xl font-black">{totalViajeros}</p>
+              <p className="text-2xl font-black text-foreground">{totalViajeros}</p>
               <p className="text-xs text-muted-foreground font-semibold">Total viajeros</p>
             </div>
           </div>
 
           <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-            <div className="p-3 bg-green-500/10 rounded-xl text-green-600"><Truck className="h-5 w-5" /></div>
+            
+            <div className="p-3 bg-green-500/10 rounded-xl text-green-600 dark:text-green-400">
+              <Truck className="h-5 w-5" />
+            </div>
             <div>
-              <p className="text-2xl font-black">{conFurgoneta}</p>
+              <p className="text-2xl font-black text-foreground">{conFurgoneta}</p>
               <p className="text-xs text-muted-foreground font-semibold">Con furgoneta</p>
             </div>
           </div>
 
           <div className="bg-card border border-border p-4 rounded-2xl flex items-center gap-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-            <div className="p-3 bg-red-500/10 rounded-xl text-red-600"><Save className="h-5 w-5" /></div>
+            
+            <div className="p-3 bg-red-500/10 rounded-xl text-red-600 dark:text-red-400">
+              <Save className="h-5 w-5" />
+            </div>
             <div>
-              <p className="text-2xl font-black">{administradores}</p>
+              <p className="text-2xl font-black text-foreground">{administradores}</p>
               <p className="text-xs text-muted-foreground font-semibold">Admins</p>
             </div>
           </div>
@@ -237,9 +245,7 @@ export const AdminPage = () => {
         {/* Menu lateral (CREATE/READ/UPDATE/DELETE) */}  
         {usuarioSeleccionado && (
           <>
-            <div className="fixed inset-0 h-[100dvh] w-screen bg-background/70 backdrop-blur-sm z-[9999]" 
-                onClick={() => { setUsuarioSeleccionado(null); setModoCrear(false); setEditando(false); }} 
-            />
+            <div className="fixed inset-0 h-[100dvh] w-screen bg-background/70 backdrop-blur-sm z-[9999]" onClick={() => { setUsuarioSeleccionado(null); setModoCrear(false); setEditando(false); }} />
 
             <div className="fixed top-0 right-0 h-[100dvh] w-full sm:max-w-sm bg-card border-l border-border shadow-2xl z-[10000] flex flex-col animate-in slide-in-from-right duration-300">
                   
@@ -266,7 +272,7 @@ export const AdminPage = () => {
                   {/* Nombre */}
                   <div className={`p-3.5 rounded-xl border transition-all duration-200 ${(editando || modoCrear) ? 'bg-background border-primary shadow-sm ring-1 ring-primary/20' : 'bg-secondary/40 border-border/50'}`}>
                       <div className="flex items-center gap-2 text-[10px] font-bold text-primary/70 uppercase tracking-tight mb-1">
-                          Nombre Completo
+                          Nombre completo
                       </div>
                       <input 
                           disabled={!editando && !modoCrear}
@@ -344,7 +350,7 @@ export const AdminPage = () => {
                   )}
 
                   <button onClick={() => setShowDeleteConfirm(true)} className="w-full py-3 border border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
-                    <Trash2 className="h-4 w-4" /> Borrar Usuario
+                    <Trash2 className="h-4 w-4" /> Borrar usuario
                   </button>
                 
 

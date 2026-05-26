@@ -143,7 +143,7 @@ export const DashboardPage = () => {
         {/* Tarjeta 1: Usuarios */}
         <div className="rounded-3xl border border-muted bg-card p-6 shadow-sm flex flex-col gap-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Usuarios Totales</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Usuarios totales</span>
             <Users className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="text-3xl font-black text-foreground">{usuarios.length}</div>
@@ -155,7 +155,7 @@ export const DashboardPage = () => {
         {/* Tarjeta 2: Rutas */}
         <div className="rounded-3xl border border-muted bg-card p-6 shadow-sm flex flex-col gap-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Rutas Creadas</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Rutas creadas</span>
             <Map className="h-4 w-4 text-[#e03b4b]" />
           </div>
           <div className="text-3xl font-black text-foreground">{totalRutas}</div>
@@ -167,12 +167,12 @@ export const DashboardPage = () => {
         {/* Tarjeta 3: Actividad */}
         <div className="rounded-3xl border border-muted bg-card p-6 shadow-sm flex flex-col gap-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Puntos de Interés</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Puntos de interés</span>
             <Activity className="h-4 w-4 text-amber-500" />
           </div>
           <div className="text-2xl font-black text-foreground">Overpass API</div>
           <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
-            <Filter className="w-3 h-3" />Filtros Activos
+            <Filter className="w-3 h-3" />Filtros activos
           </p>
         </div>
 
@@ -196,7 +196,7 @@ export const DashboardPage = () => {
         {/* Gráfica 1: Tipos de Furgonetas */}
         <div className="bg-card border border-muted p-6 rounded-[32px] space-y-4 shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
           <div>
-            <h4 className="font-black text-lg tracking-tight text-foreground">Ranking de Vehículos</h4>
+            <h4 className="font-black text-lg tracking-tight text-foreground">Ranking de vehículos</h4>
             <p className="text-xs text-muted-foreground">Los modelos más populares de la comunidad</p>
           </div>
           
@@ -235,7 +235,7 @@ export const DashboardPage = () => {
         {/* Gráfica 2: Regiones de Origen */}
         <div className="bg-card border border-muted p-6 rounded-[32px] space-y-4 shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
           <div>
-            <h4 className="font-black text-lg tracking-tight text-foreground">Lugares de Origen</h4>
+            <h4 className="font-black text-lg tracking-tight text-foreground">Lugares de origen</h4>
             <p className="text-xs text-muted-foreground">Ciudades y regiones con más viajeros activos</p>
           </div>
 
@@ -271,7 +271,7 @@ export const DashboardPage = () => {
         <div className="col-span-1 md:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm mt-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4">
             <div>
-              <h4 className="font-bold text-lg tracking-tight text-foreground">Usuarios Registrados</h4>
+              <h4 className="font-bold text-lg tracking-tight text-foreground">Usuarios registrados</h4>
               <p className="text-xs text-muted-foreground">Evolución del crecimiento durante el desarrollo del proyecto (Abril - Julio)</p>
             </div>
             <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-lg self-start text-[11px] font-semibold text-muted-foreground">
