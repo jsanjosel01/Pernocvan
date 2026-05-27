@@ -436,6 +436,7 @@ useEffect(() => {
     const query = `[out:json][timeout:25];(${queryBody});out center;`;
     // Llamamos a nuestro proxy interno en lugar de a Overpass directamente
     const url = `/api/overpass?data=${encodeURIComponent(query)}`;
+    console.log("LA URL QUE SE ESTÁ USANDO ES:", url);
 
     try {
       const response = await fetch(url);
