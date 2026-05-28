@@ -8,9 +8,9 @@
 
 ## 🎯 Objetivo del proyecto
 Su objetivo es simplificar la vida sobre ruedas proporcionando un mapa interactivo con puntos de interés clave: zonas de pernocta seguras, estaciones de servicio, puntos de recarga de agua y parkings habilitados. Permite a los usuarios planificar rutas optimizadas, descubrir sus lugares favoritos y compartir información relevante con la comunidad.
-*🔹 **Búsqueda de puntos críticos:** Localización en tiempo real de gasolineras, parkings, puntos de carga eléctrica, suministro de agua potable y zonas de gestión de residuos.
-*🔹 **Planificación:** Filtrado avanzado por tipo de servicio y necesidades específicas según el vehículo.
-*🔹 **Ecosistema de datos:** Integración con OpenStreetMap (vía Overpass API) para ofrecer información actualizada y fiable en cualquier lugar del mapa.
+* 🔹 **Búsqueda de puntos críticos:** Localización en tiempo real de gasolineras, parkings, puntos de carga eléctrica, suministro de agua potable y zonas de gestión de residuos.
+* 🔹 **Planificación:** Filtrado avanzado por tipo de servicio y necesidades específicas según el vehículo.
+* 🔹 **Ecosistema de datos:** Integración con OpenStreetMap (vía Overpass API) para ofrecer información actualizada y fiable en cualquier lugar del mapa.
 
 ## 📍 Funcionalidades: Mapa de servicios camper
 VanLife utiliza integración con **OpenStreetMap (vía Overpass API)** para ofrecer información en tiempo real sobre puntos de interés para el viajero. Nuestra plataforma clasifica los servicios en dos grandes bloques:
@@ -37,19 +37,19 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 * 🏥 **Farmacias y Salud:** Servicios médicos básicos cercanos.
 * 🔌 **Puntos de Carga EV:** Estaciones de recarga para vehículos eléctricos.
 
-### 🛠️ Tecnologías Utilizadas
+### 🛠️ Tecnologías utilizadas
 * 🔹 **FRONTEND:** React 19 + Vite + TailwindCSS + TypeScript.
 * 🔹 **BASE DE DATOS Y AUTENTICACIÓN:** Supabase (PostgreSQL + Auth + Storage).
 * 🔹 **DISEÑO:** Limpio, responsive y con componentes reutilizables (Shadcn UI).
 * 🔹 **MAPAS Y DATOS:** Leaflet y OpenStreetMap (Overpass API) para geolocalización.
 * 🔹 **ESTADO Y LÓGICA:** Zustand para gestión global.
 
-## 👥 Matriz de Roles y Permisos
+## 👥 Matriz de roles y permisos
 * 👤 **Invitado:** Acceso de solo lectura: Visualizar landing page, explorar mapa público y registrarse.
 * 🚐 **Registrado:** Acceso Total: Crear rutas, añadir lugares a favoritos.
 * 🛡️ **Admin:** Gestión: Gestión de usuarios, moderar y eliminar contenido inapropiado.
 
-### 🗄️ Estructura de Base de Datos (Supabase)
+### 🗄️ Estructura de base de datos (Supabase)
 | Tabla | Descripción |
 | :--- | :--- |
 | **`perfiles`** | Datos del usuario (nombre, avatar, tipo de vehículo, etc.) |
@@ -58,7 +58,7 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 | **`favoritos`** | Relación de lugares guardados por cada usuario |
 | **`sitios_favoritos`** | Relación de lugares guardados por cada usuario |
 
-## 💻 Comandos Útiles
+## 💻 Comandos útiles
 | Acción | Comando | Descripción |
 | :--- | :--- | :--- |
 | **📦 Instalar dependencias** | `npm install` | Descarga todas las librerías necesarias del `package.json`. |
@@ -75,7 +75,6 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 * - 🛡️ **Roles:** Sistema de permisos diferenciados para Invitados, Usuarios y Administradores.
 * - 📍 **Mapas:** Integración de Leaflet para la visualización de puntos en tiempo real.
 * - ⚙️ **Gestión de Perfil:** Personalización según el tipo de vehículo para adaptar las rutas o recomendaciones.
-* - 🌍 **Internacionalización (i18n):** Plataforma adaptada a varios idiomas.
 
 ## 🚀 **Escabilidad trabajo futuro y próximas mejoras**
 VanLife ha sido concebida como una plataforma escalable. Aunque la versión actual cubre las necesidades core del viajero, el roadmap del proyecto contempla las siguientes evoluciones:
