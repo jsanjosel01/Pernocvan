@@ -6,13 +6,11 @@
 ## 🌍 Descripción general
 **VANLIFE** es una aplicación web desarrollada para el ciclo de **Desarrollo de Aplicaciones Web (DAW)**. Es una herramienta de asistencia diseñada para dotar de autonomía a la comunidad camper, permitiendo la localización y gestión inteligente de servicios esenciales para el viajero.
 
-### 🎯 Objetivo del proyecto
+## 🎯 Objetivo del proyecto
 Su objetivo es simplificar la vida sobre ruedas proporcionando un mapa interactivo con puntos de interés clave: zonas de pernocta seguras, estaciones de servicio, puntos de recarga de agua y parkings habilitados. Permite a los usuarios planificar rutas optimizadas, descubrir sus lugares favoritos y compartir información relevante con la comunidad.
-🔹 **Búsqueda de puntos críticos:** Localización en tiempo real de gasolineras, parkings, puntos de carga eléctrica, suministro de agua potable y zonas de gestión de residuos.
-🔹 **Planificación:** Filtrado avanzado por tipo de servicio y necesidades específicas según el vehículo.
-🔹 **Ecosistema de datos:** Integración con OpenStreetMap (vía Overpass API) para ofrecer información actualizada y fiable en cualquier lugar del mapa.
-
----
+*🔹 **Búsqueda de puntos críticos:** Localización en tiempo real de gasolineras, parkings, puntos de carga eléctrica, suministro de agua potable y zonas de gestión de residuos.
+*🔹 **Planificación:** Filtrado avanzado por tipo de servicio y necesidades específicas según el vehículo.
+*🔹 **Ecosistema de datos:** Integración con OpenStreetMap (vía Overpass API) para ofrecer información actualizada y fiable en cualquier lugar del mapa.
 
 ## 📍 Funcionalidades: Mapa de servicios camper
 VanLife utiliza integración con **OpenStreetMap (vía Overpass API)** para ofrecer información en tiempo real sobre puntos de interés para el viajero. Nuestra plataforma clasifica los servicios en dos grandes bloques:
@@ -39,16 +37,12 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 * 🏥 **Farmacias y Salud:** Servicios médicos básicos cercanos.
 * 🔌 **Puntos de Carga EV:** Estaciones de recarga para vehículos eléctricos.
 
----
-
-## 🛠️ Tecnologías Utilizadas
-🔹 **FRONTEND:** React 19 + Vite + TailwindCSS + TypeScript.
-🔹 **BASE DE DATOS Y AUTENTICACIÓN:** Supabase (PostgreSQL + Auth + Storage).
-🔹 **DISEÑO:** Limpio, responsive y con componentes reutilizables (Shadcn UI).
-🔹 **MAPAS Y DATOS:** Leaflet y OpenStreetMap (Overpass API) para geolocalización.
-🔹 **ESTADO Y LÓGICA:** Zustand para gestión global.
-
----
+### 🛠️ Tecnologías Utilizadas
+*🔹 **FRONTEND:** React 19 + Vite + TailwindCSS + TypeScript.
+*🔹 **BASE DE DATOS Y AUTENTICACIÓN:** Supabase (PostgreSQL + Auth + Storage).
+*🔹 **DISEÑO:** Limpio, responsive y con componentes reutilizables (Shadcn UI).
+*🔹 **MAPAS Y DATOS:** Leaflet y OpenStreetMap (Overpass API) para geolocalización.
+*🔹 **ESTADO Y LÓGICA:** Zustand para gestión global.
 
 ## 👥 Matriz de Roles y Permisos
 * 👤 **Invitado:** Acceso de solo lectura: Visualizar landing page, explorar mapa público y registrarse.
@@ -64,8 +58,6 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 | **`favoritos`** | Relación de lugares guardados por cada usuario |
 | **`sitios_favoritos`** | Relación de lugares guardados por cada usuario |
 
----
-
 ## 💻 Comandos Útiles
 | Acción | Comando | Descripción |
 | :--- | :--- | :--- |
@@ -75,26 +67,23 @@ Nuestra aplicación permite filtrar servicios específicos para facilitar la aut
 | **👀 Previsualizar build** | `npm run preview` | Permite probar localmente la versión de producción ya compilada. |
 | **🧩 Añadir componentes** | `npx shadcn@latest add [nombre]` | Instala nuevos componentes de la librería Shadcn UI. |
 
----
-
 ## 🧩 Características implementadas
-- 🗺️ **Navegación:** Gestión de rutas con React Router.
-- ⚛️ **Arquitectura:** Componentes reutilizables y modulares (Navbar, Modales, Cards).
-- 📱 **UI/UX:** Diseño totalmente responsive con Tailwind CSS, Shadcn UI, Modo claro / oscuro (Dark/Light Mode).
-- 🔐 **Seguridad:** Autenticación con Supabase y políticas RLS para protección de datos.
-- 🛡️ **Roles:** Sistema de permisos diferenciados para Invitados, Usuarios y Administradores.
-- 📍 **Mapas:** Integración de Leaflet para la visualización de puntos en tiempo real.
-- ⚙️ **Gestión de Perfil:** Personalización según el tipo de vehículo para adaptar las rutas o recomendaciones.
-- 🌍 **Internacionalización (i18n):** Plataforma adaptada a varios idiomas.
-
+* - 🗺️ **Navegación:** Gestión de rutas con React Router.
+* - ⚛️ **Arquitectura:** Componentes reutilizables y modulares (Navbar, Modales, Cards).
+* - 📱 **UI/UX:** Diseño totalmente responsive con Tailwind CSS, Shadcn UI, Modo claro / oscuro (Dark/Light Mode).
+* - 🔐 **Seguridad:** Autenticación con Supabase y políticas RLS para protección de datos.
+* - 🛡️ **Roles:** Sistema de permisos diferenciados para Invitados, Usuarios y Administradores.
+* - 📍 **Mapas:** Integración de Leaflet para la visualización de puntos en tiempo real.
+* - ⚙️ **Gestión de Perfil:** Personalización según el tipo de vehículo para adaptar las rutas o recomendaciones.
+* - 🌍 **Internacionalización (i18n):** Plataforma adaptada a varios idiomas.
 
 ## 🚀 **Escabilidad trabajo futuro y próximas mejoras**
 VanLife ha sido concebida como una plataforma escalable. Aunque la versión actual cubre las necesidades core del viajero, el roadmap del proyecto contempla las siguientes evoluciones:
 
--🌍 **Internacionalización (i18n):** Implementación de múltiples idiomas (inglés, francés, alemán) para abarcar a la comunidad camper europea, utilizando librerías como `i18next`.
--📱 **Modo offline (PWA):** Soporte para Progressive Web App (PWA) que permita a los usuarios acceder a sus rutas guardadas y mapas cacheados en zonas sin cobertura.
--⭐ **Sistema de reseñas:** Capacidad para que los usuarios registrados puedan valorar, comentar y subir fotos actualizadas de los puntos de pernocta y servicios.
--⛅ **Integración meteorológica:** Conexión con APIs del clima para alertar a los viajeros sobre condiciones adversas en sus rutas planificadas.
+* -🌍 **Internacionalización (i18n):** Implementación de múltiples idiomas (inglés, francés, alemán) para abarcar a la comunidad camper europea, utilizando librerías como `i18next`.
+* -📱 **Modo offline (PWA):** Soporte para Progressive Web App (PWA) que permita a los usuarios acceder a sus rutas guardadas y mapas cacheados en zonas sin cobertura.
+* -⭐ **Sistema de reseñas:** Capacidad para que los usuarios registrados puedan valorar, comentar y subir fotos actualizadas de los puntos de pernocta y servicios.
+* -⛅ **Integración meteorológica:** Conexión con APIs del clima para alertar a los viajeros sobre condiciones adversas en sus rutas planificadas.
 
 ---
 
@@ -115,6 +104,7 @@ VanLife ha sido concebida como una plataforma escalable. Aunque la versión actu
 #### **JUNIO: FINALIZACIÓN Y PRESENTACIÓN**
 * **01-JUNIO** | ✅ Presentación final del TFG ante el tribunal.
 
+---
 
 ## 👤 **Autoría del proyecto**
 
